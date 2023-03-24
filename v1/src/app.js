@@ -10,13 +10,7 @@ const app = express();
 app.use(express.json());
 app.use(helmet());
 
-console.log("Merhabaaaaa.");
 
-
-
-
-console.log("Merhaba Özhan");
-console.log("Merhaba Özhan");
 
 
 app.listen(process.env.APP_PORT, () => {
