@@ -10,9 +10,6 @@ const app = express();
 app.use(express.json());
 app.use(helmet());
 
-
-
-
 console.log("Merhaba Özhan");
 console.log("Merhaba Özhan");
 
