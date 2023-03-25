@@ -1,8 +1,8 @@
 
 const Host = require("../models/Hosts");
 
-const insert = (hostData) => {
-    const host = new Host(hostData);
+const insert = (data) => {
+    const host = new Host(data);
     return host.save();
 }
 
@@ -10,12 +10,12 @@ const list = () => {
    return Host.find({});
 }
 
-const getHostById = () => {
-    return Host.findById();
+const loginHost = (loginData) => {
+    return Host.findOne(loginData)
 }
 
 module.exports = {
     insert,
     list,
-    getHostById,
+    loginHost,
 }

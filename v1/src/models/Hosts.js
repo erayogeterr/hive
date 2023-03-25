@@ -6,6 +6,8 @@ const HostSchema = new Mongoose.Schema({
     lastName : String,
     email : String,
     password : String,
+    profile_image : String,
+    
 }, {timestamps: true, versionKey : false});
 
 
@@ -16,7 +18,7 @@ const HostSchema = new Mongoose.Schema({
  HostSchema.post("save", (doc) => {
      logger.log({
         level : "info",
-        message : doc 
+        message : doc,
      })
   })
 
