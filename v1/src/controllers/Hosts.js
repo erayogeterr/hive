@@ -1,7 +1,6 @@
 const { insert, list,} = require("../services/Hosts");
 const httpStatus = require("http-status");
 
-
 const create = (req, res) => {
     insert(req.body)
         .then((response) => {
