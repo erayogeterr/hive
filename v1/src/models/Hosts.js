@@ -7,5 +7,8 @@ const HostSchema = new Mongoose.Schema({
     password : String,
 }, {timestamps: true, versionKey : false});
 
+
+
+
 module.exports = Mongoose.model("host", HostSchema);
 
