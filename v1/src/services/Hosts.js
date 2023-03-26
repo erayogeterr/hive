@@ -14,8 +14,13 @@ const loginHost = (loginData) => {
     return Host.findOne(loginData)
 }
 
+const modify = (where,data) => {
+    return Host.findOneAndUpdate(where,data, { new: true});
+}
+
 module.exports = {
     insert,
     list,
     loginHost,
+    modify,
 }
