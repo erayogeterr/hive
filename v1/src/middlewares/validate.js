@@ -12,3 +12,5 @@ const validate = (schema) => (req, res, next) => {
 };
 
 module.exports = validate;
+
+//Gelen body bilgisini kontrol ediyor. Joi ile.

@@ -12,7 +12,7 @@ const authenticateToken = (req,res,next) => {
 
    JWT.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY, (err, host) => {
     if(err) return res.status(httpStatus.FORBIDDEN).send({ error : err })
-    req.host = host;
+    req.host = host?.doc;
     next();
    })
 }
