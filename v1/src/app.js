@@ -22,7 +22,7 @@ app.get("/deployment", (req,res) => {
 
 
 
-app.listen(process.env.APP_PORT, () => {
+app.listen(process.env.APP_PORT || 8000, () => {
     console.log("Sunucu ayağa kalktı.");
     app.use("/hosts", HostRoutes);
 })
