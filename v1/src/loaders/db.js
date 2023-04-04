@@ -14,7 +14,7 @@ const connectDB = async () => {
         useUnifiedTopology: true })
         .then(client => {
             console.log(`connected to Database`)
-           // const db1 = client.db1(`hive`)
+            const db = client.db(`hive`)
         });
     };
   // {
