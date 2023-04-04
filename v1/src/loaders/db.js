@@ -10,10 +10,10 @@ db.once("open", () => {
 
 //LocalHost
 const connectDB = async () => {
-    await Mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-     });
+    // await Mongoose.connect(`mongodb://${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`, {
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true,
+    //  });
 }; 
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
