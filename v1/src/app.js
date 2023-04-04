@@ -13,6 +13,10 @@ const app = express();
 app.use(express.json());
 app.use(helmet());
 
+app.get("/deployment", (req,res) => {
+    res.send("Helle deployment!");
+})
+
 
 
 app.listen(process.env.APP_PORT, () => {
