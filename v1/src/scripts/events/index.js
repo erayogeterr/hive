@@ -8,6 +8,7 @@ module.exports = () => {
         let transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST,
             port: process.env.PORT,
+            secure: false,
             auth: {
               user: 'hiveproject67@gmail.com',
               pass:'rdjmckfdkscyklcy'
