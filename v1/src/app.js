@@ -14,7 +14,7 @@ app.use(express.json());
 app.use(helmet());
 
 app.get("/deployment", (req,res) => {
-    res.send("Helle deployment!");
+    res.send("Hello deployment!");
 })
 
 
