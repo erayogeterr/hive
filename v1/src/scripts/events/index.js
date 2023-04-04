@@ -12,7 +12,7 @@ module.exports = () => {
             tls:{rejectUnauthorized:false},
             auth: {
               user: 'hiveproject67@gmail.com',
-              pass:'rdjmckfdkscyklcy'
+              pass:'wtlmxxmmjqpqqzyl'
             },
           });
 
