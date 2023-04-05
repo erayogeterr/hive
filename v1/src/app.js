@@ -8,7 +8,6 @@ const cors = require("cors")
 
 config();
 loaders();
-//events();
 
 const app = express();
 app.use(express.json());
