@@ -91,7 +91,7 @@ const deleteHost = (req, res) => {
 
  const changePassword = (req, res) => {
       req.body.password = passwordToHash(req.body.password);
-      modify({ _id: req.host?._id }, req.body)
+      modify({ _id: req.host?._id }, { password: req.body.password })
           .then((updatedHost) => {
               res.status(httpStatus.OK).send(updatedHost);
           })
