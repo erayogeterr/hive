@@ -93,7 +93,7 @@ const changePassword = (req, res) => {
      console.log(req.body.password);
      req.body.password = passwordToHash(req.body.password);
      console.log(req.body.password);
-     modify({ email: req.host.email }, req.body)
+     modify({ _id: req.body.hostId }, req.body)
          .then((updatedHost) => {
             console.log("Updated host." , updatedHost);
              res.status(httpStatus.OK).send(updatedHost);
