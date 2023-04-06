@@ -15,6 +15,7 @@ const loginHost = (loginData) => {
 }
 
 const modify = (where,data) => {
+    console.log("Modify calisti.");
     return Host.findOneAndUpdate(where,data, { new: true});
 }
 
