@@ -93,10 +93,10 @@ const deleteHost = (req, res) => {
       console.log("Sifrelenmemis hali body : " , req.body.password);
       req.body.password = passwordToHash(req.body.password);
       console.log("Sifrelenmis hali body : " , req.body.password);
-      console.log("host : ", req.host);
-      modify({ _id : req.host?._id }, req.body)
+      console.log("user : ", req.user);
+      modify({ _id : req.user?._id }, req.body)
           .then((updatedHost) => {
-            console.log("updated host: ", updatedHost);
+            console.log("updated user: ", updatedHost);
               res.status(httpStatus.OK).send(updatedHost);
           })
           .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
