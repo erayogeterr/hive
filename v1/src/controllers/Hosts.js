@@ -89,36 +89,15 @@ const deleteHost = (req, res) => {
         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Silme işlemi sırasında hata ile karşılaşıldı."}));
 }
 
-// const changePassword = (req, res) => {
-//      console.log(req.body.password);
-//      req.body.password = passwordToHash(req.body.password);
-//      console.log(req.body.password);
-//      modify({ _id: req.user?._id }, req.body)
-//          .then((updatedHost) => {
-//             console.log("Updated host." , updatedHost);
-//              res.status(httpStatus.OK).send(updatedHost);
-//          })
-//          .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
-// }
+ const changePassword = (req, res) => {
+      req.body.password = passwordToHash(req.body.password);
+      modify({ _id: req.host?._id }, req.body)
+          .then((updatedHost) => {
+              res.status(httpStatus.OK).send(updatedHost);
+          })
+          .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
+ }
 
-const changePassword = async (req, res) => {
-    try {
-        const { currentPassword, newPassword } = req.body;
-        const host = await Host.findById(req.host._id);
-        if (!host) {
-            return res.status(httpStatus.NOT_FOUND).send({ error: 'Kullanıcı bulunamadı.' });
-        }
-        const isMatch = await host.comparePassword(currentPassword);
-        if (!isMatch) {
-            return res.status(httpStatus.UNAUTHORIZED).send({ error: 'Mevcut şifre doğrulanamadı.' });
-        }
-        host.password = newPassword;
-        await host.save();
-        res.status(httpStatus.OK).send({ message: 'Şifre başarıyla güncellendi.' });
-    } catch (error) {
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: 'Güncelleme işlemi sırasında bir problem oluştu.' });
-    }
-};
 
 const updateProfileImage = (req,res) => {
     //Resim Kontrol
