@@ -94,7 +94,7 @@ const changePassword = (req, res) => {
         req.body.password = passwordToHash(req.body.password);
       }
     
-      update(req.params.id, req.body)
+      modify(req.params.id, req.body)
         .then((result) => {
           res.status(httpStatus.OK).send(result);
         })
