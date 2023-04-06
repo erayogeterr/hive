@@ -1,7 +1,7 @@
 const express = require("express");
 const validate = require("../middlewares/validate") // middleware
 const schemas = require("../validations/Hosts") // validations
-const { create, index, login, resetPassword, update, deleteHost, changePassword} = require("../controllers/Hosts");
+const { create, index, login, resetPassword, update, deleteHost, changePassword, updateProfileImage} = require("../controllers/Hosts");
 const authenticate = require("../middlewares/authenticate");
 
 const router = express.Router();
@@ -15,5 +15,7 @@ router.route("/").patch(authenticate, validate(schemas.updateValidation), update
 router.route("/:id").delete(authenticate, deleteHost);
 router.route("/reset-password").post(validate(schemas.resetPasswordValidation),resetPassword);
 router.route("/change-password").post(authenticate ,validate(schemas.changePasswordValidation),changePassword);
+router.route("/update-profile-image").post(authenticate, updateProfileImage);
+
 
 module.exports = router;
