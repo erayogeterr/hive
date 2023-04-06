@@ -104,7 +104,7 @@ const deleteHost = (req, res) => {
 const changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
-        const host = await Host.findById(req.user._id);
+        const host = await Host.findById(req.host._id);
         if (!host) {
             return res.status(httpStatus.NOT_FOUND).send({ error: 'Kullanıcı bulunamadı.' });
         }
