@@ -18,9 +18,14 @@ const modify = (where,data) => {
     return Host.findOneAndUpdate(where,data, { new: true});
 }
 
+const remove = (id) => {
+    return Host.findByIdAndDelete(id);
+}
+
 module.exports = {
     insert,
     list,
     loginHost,
     modify,
+    remove,
 }

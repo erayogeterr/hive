@@ -1,4 +1,4 @@
-const { insert, list, loginHost, modify} = require("../services/Hosts");
+const { insert, list, loginHost, modify, remove} = require("../services/Hosts");
 const httpStatus = require("http-status");
 const uuid = require("uuid");
 const { passwordToHash, generateAccessToken, generateRefreshToken } = require("../scripts/utils/helper");
@@ -68,10 +68,31 @@ const update = (req, res) => {
         .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
 }
 
+const deleteHost = (req, res) => {
+    if(!req.params?.id) {
+        return res.status(httpStatus.BAD_REQUEST).send({
+            message : "ID Bilgisi Eksik.",
+        });
+    }
+    remove(req.params?.id)
+        .then((deletedItem) => {
+            if(!deletedItem) {
+                return res.status(httpStatus.NOT_FOUND).send({
+                    message : "Böyle bir kayıt bulunmamaktadır.",
+                });
+            }
+            res.status(httpStatus.OK).send({
+                message : "Kayıt silinmiştir.",
+            });
+        })
+        .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Silme işlemi sırasında hata ile karşılaşıldı."}));
+}
+
 module.exports = {
     create,
     index,
     login,
     resetPassword,
     update,
+    deleteHost,
 }
