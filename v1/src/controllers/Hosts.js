@@ -62,7 +62,7 @@ const resetPassword = (req,res) => {
 
 
 const update = (req, res) => {
-    modify({ id : req.host?._id }, req.body)
+    modify({ _id : req.host?._id }, req.body)
         .then((updatedHost) => {
             res.status(httpStatus.OK).send(updatedHost);
         })
@@ -90,18 +90,12 @@ const deleteHost = (req, res) => {
 }
 
 const changePassword = (req, res) => {
-    req.body.password = passwordToHash(req.body.password);
-    modify({ id : req.params.id }, req.body)
-        .then((updatedHost) => {
-            res.status(httpStatus.OK).send(updatedHost);
-        })
-        .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
-    // req.body.password = passwordToHash(req.body.password);
-    // modify({ id : req.host?._id }, req.body)
-    //     .then((updatedHost) => {
-    //         res.status(httpStatus.OK).send(updatedHost);
-    //     })
-    //     .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
+     req.body.password = passwordToHash(req.body.password);
+     modify({ _id : req.host?._id }, req.body)
+         .then((updatedHost) => {
+             res.status(httpStatus.OK).send(updatedHost);
+         })
+         .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
 }
 
 const updateProfileImage = (req,res) => {
