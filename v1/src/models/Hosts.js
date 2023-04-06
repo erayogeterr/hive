@@ -2,7 +2,7 @@ const Mongoose = require("mongoose")
 const logger = require("../scripts/logger/Hosts");
 
 const HostSchema = new Mongoose.Schema({
-    //_id : Mongoose.Types.ObjectId,
+    _id : Mongoose.Types.ObjectId,
     firstName : String,
     lastName : String,
     email : String,
