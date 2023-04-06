@@ -90,18 +90,18 @@ const deleteHost = (req, res) => {
 }
 
 const changePassword = (req, res) => {
-    const { email, password } = req.body;
-    const hashedPassword = passwordToHash(password);
-  
-    modify({ email }, { password: hashedPassword })
-      .then((updatedHost) => {
-        res.status(httpStatus.OK).send(updatedHost);
-      })
-      .catch(() =>
-        res
-          .status(httpStatus.INTERNAL_SERVER_ERROR)
-          .send({ error: "Güncelleme işlemi sırasında bir problem oluştu." })
-      );
+     const {password } = req.body;
+  const hashedPassword = passwordToHash(password);
+
+  modify({ password: hashedPassword })
+    .then((updatedHost) => {
+      res.status(httpStatus.OK).send(updatedHost);
+    })
+    .catch(() =>
+      res
+        .status(httpStatus.INTERNAL_SERVER_ERROR)
+        .send({ error: "Güncelleme işlemi sırasında bir problem oluştu." })
+    );
     //  req.body.password = passwordToHash(req.body.password);
     //  modify({ id : req.host?._id }, req.body)
     //      .then((updatedHost) => {
