@@ -16,7 +16,7 @@ const loginHost = (loginData) => {
 
 const modify = (where,data) => {
     console.log("Modify calisti.");
-    return Host.updateOne(where,data, { new: true});
+    return Host.findByIdAndUpdate(where,data, { new: true});
 }
 
 const remove = (id) => {
