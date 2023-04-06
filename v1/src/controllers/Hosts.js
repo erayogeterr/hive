@@ -88,6 +88,15 @@ const deleteHost = (req, res) => {
         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Silme işlemi sırasında hata ile karşılaşıldı."}));
 }
 
+const changePassword = (req, res) => {
+    req.body.password = passwordToHash(req.body.password);
+    modify({ id : req.host?._id }, req.body)
+        .then((updatedHost) => {
+            res.status(httpStatus.OK).send(updatedHost);
+        })
+        .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
+}
+
 module.exports = {
     create,
     index,
@@ -95,4 +104,5 @@ module.exports = {
     resetPassword,
     update,
     deleteHost,
+    changePassword,
 }
