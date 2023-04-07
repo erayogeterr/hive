@@ -14,21 +14,10 @@ const loginHost = (loginData) => {
     return Host.findOne(loginData)
 }
 
-//  const modify = (where,data) => {
-//      console.log("Modify calisti.");
-//      return Host.findByIdAndUpdate(where,data, { new: true});
-//  }
-
-modify(req.user._id, req.body)
-  .then((updatedHost) => {
-    console.log("updated user: ", updatedHost);
-    res.status(httpStatus.OK).send(updatedHost);
-  })
-  .catch((err) => {
-    console.error("update error: ", err);
-    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: err.message });
-  });
-
+  const modify = (where,data) => {
+      console.log("Modify calisti.");
+      return Host.findByIdAndUpdate(where,data, { new: true});
+  }
 
 const remove = (id) => {
     return Host.findByIdAndDelete(id);
