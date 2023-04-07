@@ -14,9 +14,14 @@ const loginHost = (loginData) => {
     return Host.findOne(loginData)
 }
 
-const modify = (where,data) => {
+// const modify = (where,data) => {
+//     console.log("Modify calisti.");
+//     return Host.findByIdAndUpdate(where,data, { new: true});
+// }
+
+const modify = (userId, userData) => {
     console.log("Modify calisti.");
-    return Host.findByIdAndUpdate(where,data, { new: true});
+    return Host.findByIdAndUpdate(userId,userData, { new: true});
 }
 
 const remove = (id) => {
