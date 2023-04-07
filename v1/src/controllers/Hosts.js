@@ -91,6 +91,10 @@ const deleteHost = (req, res) => {
 
 const changePassword = (req, res) => {
 
+    if (!req.user || req.user._id.toString() !== req.params.id) {
+        return res.status(httpStatus.UNAUTHORIZED).send("You are not authorized to perform this action.");
+      }
+
     if (req.body.password) {
         req.body.password = passwordToHash(req.body.password);
       }
