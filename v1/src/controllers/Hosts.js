@@ -93,8 +93,8 @@ const changePassword = (req, res) => {
     console.log("Sifrelenmemis hali body : ", req.body.password);
     req.body.password = passwordToHash(req.body.password);
     console.log("Sifrelenmis hali body : ", req.body.password);
-    console.log("user email : ", req.user.email);
-    modify(req.user.email, req.body)
+    console.log("user : ", req.user);
+    modify(req.user._id, req.body)
       .then((updatedHost) => {
         console.log("updated user: ", updatedHost);
         res.status(httpStatus.OK).send(updatedHost);
