@@ -10,12 +10,19 @@ const JWT = require("jsonwebtoken")
     }
    
 
-    JWT.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY, (err, user) => {
-     if(err) return res.status(httpStatus.FORBIDDEN).send({ error : err })
-     //req.user = user?.doc;
-     req.user = user;
-     next();
-    })
+   //  JWT.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY, (err, user) => {
+   //   if(err) return res.status(httpStatus.FORBIDDEN).send({ error : err })
+   //   //req.user = user?.doc;
+   //   req.user = user;
+   //   next();
+   //  })
+   try {
+      const decoded = JWT.verify(token, process.env.JWT_SECRET);
+      req.user = decoded; // req.user özelliğini ayarla
+      next(); // bir sonraki işleve geç
+    } catch (ex) {
+      res.status(httpStatus.BAD_REQUEST).send("Invalid token.");
+    }
  }
 
 
