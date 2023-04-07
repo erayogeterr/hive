@@ -91,24 +91,18 @@ const deleteHost = (req, res) => {
 
 const changePassword = (req, res) => {
 
-    if (req.user._id.toString() !== req.params.id) {
-        return res.status(httpStatus.UNAUTHORIZED).send("You are not authorized to perform this action.");
-      }
-
-    console.log("Sifrelenmemis hali body : " , req.body.password);
     if (req.body.password) {
         req.body.password = passwordToHash(req.body.password);
       }
-      console.log("Sifrelenmis hali body : " , req.body.password);
-      console.log("user : ", req.user);
-      update(req.params.id, req.body)
+    
+      modify(req.params.id, req.body)
         .then((result) => {
-            console.log("updated user: ", result);
           res.status(httpStatus.OK).send(result);
         })
         .catch((err) => {
           res.status(httpStatus.NOT_FOUND).send(err);
         });
+    };
 
     // console.log("Sifrelenmemis hali body : " , req.body.password);
     // req.body.password = passwordToHash(req.body.password);
@@ -120,7 +114,7 @@ const changePassword = (req, res) => {
     //         res.status(httpStatus.OK).send(updatedHost);
     //     })
     //     .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
-  };
+  //};
        
 
 
