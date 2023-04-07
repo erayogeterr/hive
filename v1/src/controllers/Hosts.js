@@ -91,15 +91,30 @@ const deleteHost = (req, res) => {
 
 const changePassword = (req, res) => {
     console.log("Sifrelenmemis hali body : " , req.body.password);
-    req.body.password = passwordToHash(req.body.password);
-    console.log("Sifrelenmis hali body : " , req.body.password);
-    console.log("user : ", req.user);
-    modify({ id : req.user?._id }, req.body)
-        .then((updatedHost) => {
-          console.log("updated user: ", updatedHost);
-            res.status(httpStatus.OK).send(updatedHost);
+    if (req.body.password) {
+        req.body.password = passwordToHash(req.body.password);
+      }
+      console.log("Sifrelenmis hali body : " , req.body.password);
+      console.log("user : ", req.user);
+      update(req.params.id, req.body)
+        .then((result) => {
+            console.log("updated user: ", result);
+          res.status(httpStatus.OK).send(result);
         })
-        .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
+        .catch((err) => {
+          res.status(httpStatus.NOT_FOUND).send(err);
+        });
+
+    // console.log("Sifrelenmemis hali body : " , req.body.password);
+    // req.body.password = passwordToHash(req.body.password);
+    // console.log("Sifrelenmis hali body : " , req.body.password);
+    // console.log("user : ", req.user);
+    // modify({ id : req.user?._id }, req.body)
+    //     .then((updatedHost) => {
+    //       console.log("updated user: ", updatedHost);
+    //         res.status(httpStatus.OK).send(updatedHost);
+    //     })
+    //     .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
   };
        
 
