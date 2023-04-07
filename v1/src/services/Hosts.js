@@ -20,7 +20,7 @@ const loginHost = (loginData) => {
 //   }
 
 const modify = (userId, usersData) => {
-    return User.findByIdAndUpdate(userId, usersData);
+    return Host.findByIdAndUpdate(userId, usersData);
   };
 
 const remove = (id) => {

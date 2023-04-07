@@ -12,8 +12,7 @@ const JWT = require("jsonwebtoken")
 
      JWT.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY, (err, user) => {
       if(err) return res.status(httpStatus.FORBIDDEN).send({ error : err })
-      //req.user = user?.doc;
-      req.user = user;
+      req.user = user?.doc;
       next();
      })
  }
