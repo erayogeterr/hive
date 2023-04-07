@@ -89,29 +89,54 @@ const deleteHost = (req, res) => {
         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Silme işlemi sırasında hata ile karşılaşıldı."}));
 }
 
+// const changePassword = (req, res) => {
+
+//     console.log("Sifrelenmemis hali : ",req.body.password);
+
+//     if (req.body.password) {
+//         req.body.password = passwordToHash(req.body.password);
+//       }
+
+//       console.log("Sifrelenmis hali : ",req.body.password);
+    
+//       console.log("req : ", req.user && req.user.doc);
+
+
+//       modify(req.params.id, req.body)
+//         .then((result) => {
+
+//             console.log("sonuc : ", result);
+//           res.status(httpStatus.OK).send(result);
+//         })
+//         .catch((err) => {
+//           res.status(httpStatus.NOT_FOUND).send(err);
+//         });
+//     };
+
 const changePassword = (req, res) => {
 
-    console.log("Sifrelenmemis hali : ",req.body.password);
-
-    if (req.body.password) {
-        req.body.password = passwordToHash(req.body.password);
+    if (req.user && req.user._id === req.params.id) {
+      console.log("Sifrelenmemis hali : ",req.body.password);
+      if (req.body.password) {
+          req.body.password = passwordToHash(req.body.password);
       }
-
+  
       console.log("Sifrelenmis hali : ",req.body.password);
-    
-      console.log("req : ", req.user && req.user.doc);
-
-
+  
+      console.log("req : " , req);
+  
       modify(req.params.id, req.body)
         .then((result) => {
-
-            console.log("sonuc : ", result);
+          console.log("sonuc : ", result);
           res.status(httpStatus.OK).send(result);
         })
         .catch((err) => {
           res.status(httpStatus.NOT_FOUND).send(err);
         });
-    };
+    } else {
+      res.status(httpStatus.UNAUTHORIZED).send("You are not authorized to perform this action.");
+    }
+  };
 
     // console.log("Sifrelenmemis hali body : " , req.body.password);
     // req.body.password = passwordToHash(req.body.password);
