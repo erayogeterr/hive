@@ -99,7 +99,7 @@ const changePassword = (req, res) => {
 
       console.log("Sifrelenmis hali : ",req.body.password);
     
-      console.log("req body : " , req.body);
+      console.log("req : " , req);
 
       modify(req.params.id, req.body)
         .then((result) => {
