@@ -17,7 +17,7 @@ const JWT = require("jsonwebtoken")
    //   next();
    //  })
    try {
-      const decoded = JWT.verify(token, process.env.JWT_SECRET);
+      const decoded = JWT.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY);
       req.user = decoded; // req.user özelliğini ayarla
       next(); // bir sonraki işleve geç
     } catch (ex) {
