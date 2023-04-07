@@ -14,27 +14,11 @@ const loginHost = (loginData) => {
     return Host.findOne(loginData)
 }
 
-// const modify = (where,data) => {
-//     console.log("Modify calisti.");
-//     return Host.findByIdAndUpdate(where,data, { new: true});
-// }
+ const modify = (where,data) => {
+     console.log("Modify calisti.");
+     return Host.findByIdAndUpdate(where,data, { new: true});
+ }
 
-// const modify = (userId, userData) => {
-//     console.log("Modify calisti.");
-//     return Host.findByIdAndUpdate(userId,userData, { new: true});
-// }
-
-if (req.user && req.user.email) {
-    modify({ email: req.user.email }, req.body)
-      .then((result) => {
-        res.status(httpStatus.OK).send(result);
-      })
-      .catch((err) => {
-        res.status(httpStatus.NOT_FOUND).send(err);
-      });
-  } else {
-    res.status(httpStatus.UNAUTHORIZED).send({ error: 'Kullanıcı kimliği doğrulanamadı.' });
-  }
 
 const remove = (id) => {
     return Host.findByIdAndDelete(id);
