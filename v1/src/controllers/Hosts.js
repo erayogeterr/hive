@@ -94,7 +94,7 @@ const deleteHost = (req, res) => {
         req.body.password = passwordToHash(req.body.password);
       }
     
-      modify({ _id : req.user._id }, req.body)
+      modify({ id : req.user._id }, req.body)
         .then((result) => {
           res.status(httpStatus.OK).send(result);
         })
