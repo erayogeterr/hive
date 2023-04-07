@@ -19,10 +19,14 @@ const loginHost = (loginData) => {
 //     return Host.findByIdAndUpdate(where,data, { new: true});
 // }
 
-const modify = (userId, userData) => {
-    console.log("Modify calisti.");
-    return Host.findByIdAndUpdate(userId,userData, { new: true});
-}
+// const modify = (userId, userData) => {
+//     console.log("Modify calisti.");
+//     return Host.findByIdAndUpdate(userId,userData, { new: true});
+// }
+
+const modify = (email, data) => {
+    return Host.findOneAndUpdate({ email: email }, data, { new: true });
+  };
 
 const remove = (id) => {
     return Host.findByIdAndDelete(id);
