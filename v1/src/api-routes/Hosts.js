@@ -15,7 +15,7 @@ router.route("/").patch(authenticate, validate(schemas.updateValidation), update
 router.route("/:id").delete(authenticate, deleteHost);
 router.route("/reset-password").post(validate(schemas.resetPasswordValidation),resetPassword);
 //router.route("/change-password/").post(authenticate ,validate(schemas.changePasswordValidation),changePassword);
-router.route("/change-password/:id").patch(authenticate ,validate(schemas.changePasswordValidation),changePassword);
+router.route("/change-password/:id").put(authenticate ,validate(schemas.changePasswordValidation),changePassword);
 router.route("/update-profile-image").post(authenticate, updateProfileImage);
 
 
