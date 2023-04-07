@@ -6,12 +6,10 @@ const passwordToHash = (password) => {
  };
  
  const generateAccessToken = (user) => {
-    //return JWT.sign({name : user.email, ...user}, process.env.ACCESS_TOKEN_SECRET_KEY, {expiresIn: "1w"}) //şifrelendiriyor ama isimlendirmekde gerekiyor. key'i name.
-      return JWT.sign({name : user.name, ...user}, process.env.ACCESS_TOKEN_SECRET_KEY, {expiresIn: "1w"})
+    return JWT.sign({name : user.email, ...user}, process.env.ACCESS_TOKEN_SECRET_KEY, {expiresIn: "1w"}) //şifrelendiriyor ama isimlendirmekde gerekiyor. key'i name.  
 }
 const generateRefreshToken = (user) => {
-   // return JWT.sign({name : user.email, ...user}, process.env.REFRESH_TOKEN_SECRET_KEY)
-    return JWT.sign({name : user.name, ...user}, process.env.REFRESH_TOKEN_SECRET_KEY)
+    return JWT.sign({name : user.email, ...user}, process.env.REFRESH_TOKEN_SECRET_KEY)
 }
 
 
