@@ -24,9 +24,17 @@ const loginHost = (loginData) => {
 //     return Host.findByIdAndUpdate(userId,userData, { new: true});
 // }
 
-const modify = (email, data) => {
-    return Host.findOneAndUpdate({ email: email }, data, { new: true });
-  };
+if (req.user && req.user.email) {
+    modify({ email: req.user.email }, req.body)
+      .then((result) => {
+        res.status(httpStatus.OK).send(result);
+      })
+      .catch((err) => {
+        res.status(httpStatus.NOT_FOUND).send(err);
+      });
+  } else {
+    res.status(httpStatus.UNAUTHORIZED).send({ error: 'Kullanıcı kimliği doğrulanamadı.' });
+  }
 
 const remove = (id) => {
     return Host.findByIdAndDelete(id);
