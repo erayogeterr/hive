@@ -74,7 +74,9 @@ const deleteUser = (req, res) => {
             message : "ID Bilgisi Eksik.",
         });
     }
-    remove(req.params?.id)
+
+    if (req.user && req.user._doc._id === req.params.id) {
+        remove(req.params?.id)
         .then((deletedItem) => {
             if(!deletedItem) {
                 return res.status(httpStatus.NOT_FOUND).send({
@@ -86,6 +88,11 @@ const deleteUser = (req, res) => {
             });
         })
         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Silme işlemi sırasında hata ile karşılaşıldı."}));
+    } else {
+        res.status(httpStatus.UNAUTHORIZED).send("You are not authorized to perform this action.");
+    }
+
+    
 };
 
 const changePassword = (req, res) => {
