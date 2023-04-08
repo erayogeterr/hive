@@ -14,8 +14,8 @@ const loginUser = (loginData) => {
 }
 
 const modify = (userId, usersData) => {
-    return User.findByIdAndUpdate(userId, usersData);
-  };
+    return User.findByIdAndUpdate(userId, usersData, {new : true});
+};
 
 const remove = (id) => {
     return User.findByIdAndDelete(id);
