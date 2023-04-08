@@ -62,7 +62,7 @@ const resetPassword = (req,res) => {
 
 const update = (req, res) => {
     //modify({ _id : req.user?._id }, req.body.user._id)
-    modify(req.body.user._id,req.body)
+    modify(req.body.user._doc._id,req.body)
         .then((updatedUser) => {
             res.status(httpStatus.OK).send(updatedUser);
         })
