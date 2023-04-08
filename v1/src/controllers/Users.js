@@ -64,7 +64,7 @@ const update = (req, res) => {
     console.log("req.user?._id : " , req.user?._id)
     modify({ _id : req.user?._id }, req.body)
     console.log("req.user?._id : " , req.user?._id)
-    console.log("req", req);
+    console.log("req", req)
         .then((updatedUser) => {
             res.status(httpStatus.OK).send(updatedUser);
         })
