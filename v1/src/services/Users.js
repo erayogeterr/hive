@@ -9,7 +9,7 @@ const list = () => {
    return User.find({});
 }
 
-const loginHost = (loginData) => {
+const loginUser = (loginData) => {
     return User.findOne(loginData)
 }
 
@@ -24,7 +24,7 @@ const remove = (id) => {
 module.exports = {
     insert,
     list,
-    loginHost,
+    loginUser,
     modify,
     remove,
 }
