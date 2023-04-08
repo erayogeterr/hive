@@ -1,7 +1,7 @@
 const express = require("express");
 const validate = require("../middlewares/validate") // middleware
 const schemas = require("../validations/Users") // validations
-const { create, index, login, resetPassword, update, deleteHost, changePassword, updateProfileImage, deleteUser} = require("../controllers/Users");
+const { create, index, login, resetPassword, update, changePassword, updateProfileImage, deleteUser} = require("../controllers/Users");
 const authenticate = require("../middlewares/authenticate");
 
 const router = express.Router();

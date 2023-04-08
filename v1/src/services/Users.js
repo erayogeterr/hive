@@ -14,11 +14,11 @@ const loginHost = (loginData) => {
 }
 
 const modify = (userId, usersData) => {
-    return Host.findByIdAndUpdate(userId, usersData);
+    return User.findByIdAndUpdate(userId, usersData);
   };
 
 const remove = (id) => {
-    return Host.findByIdAndDelete(id);
+    return User.findByIdAndDelete(id);
 }
 
 module.exports = {
