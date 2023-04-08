@@ -66,9 +66,12 @@ const update = (req, res) => {
         res.status(httpStatus.UNAUTHORIZED).send({ error: "Kullanıcı oturum açmamış." });
         return;
     }
+    console.log("Kullanıcı oturum açmış görünüyor")
+    console.log("user idsi : ",req.user._id);
 
     modify({ _id : req.user._id }, req.body)
         .then((updatedUser) => {
+            console.log("updated USER : ")
             res.status(httpStatus.OK).send(updatedUser);
         })
         .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
