@@ -70,7 +70,7 @@ const update = (req, res) => {
     console.log("user idsi : ",req.user._id);
     console.log("req : ", req);
 
-    modifyV2({ _id : req.user._id }, req.body)
+    modifyV2({ _id : req.user?._id }, req.body)
         .then((updatedUser) => {
             console.log("updated USER : ")
             res.status(httpStatus.OK).send(updatedUser);
