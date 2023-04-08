@@ -27,5 +27,4 @@ module.exports = {
     loginUser,
     modify,
     remove,
-    modifyV2,
 }

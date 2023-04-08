@@ -1,4 +1,4 @@
-const { insert, list, loginUser, modify, remove, modifyV2} = require("../services/Users");
+const { insert, list, loginUser, modify, remove} = require("../services/Users");
 const httpStatus = require("http-status");
 const uuid = require("uuid");
 const { passwordToHash, generateAccessToken, generateRefreshToken } = require("../scripts/utils/helper");
