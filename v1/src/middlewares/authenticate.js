@@ -1,11 +1,10 @@
 const httpStatus = require("http-status")
 const JWT = require("jsonwebtoken")
 
-
  const authenticateToken = (req,res,next) => {
     const authHeader =  req.headers["authorization"]
-   // const token = authHeader && authHeader.split(" ")[1]
-      const token = authHeader?.split(" ")[1]
+    const token = authHeader && authHeader.split(" ")[1]
+    console.log(token);
     if(!token) {
      return res.status(httpStatus.UNAUTHORIZED).send({ error : "Bu işlemi yapmak için ilk olarak giriş yapmalısınız."})
     }
