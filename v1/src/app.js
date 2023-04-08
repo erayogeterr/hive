@@ -1,6 +1,4 @@
 const express = require("express");
-var cookieParser = require('cookie-parser')
-var session = require('express-session')
 const fileUpload = require("express-fileupload");
 const helmet = require("helmet")
 const config = require("./config");
@@ -19,8 +17,7 @@ app.use(express.json());
 app.use(helmet());
 app.use(cors());
 app.use(fileUpload());
-app.use(cookieParser()) // required before session.
-app.use(session({secret: 'keyboard cat'}))
+
 
 app.listen(process.env.APP_PORT || 8000, () => {
     console.log("Sunucu ayağa kalktı.");
