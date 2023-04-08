@@ -1,4 +1,4 @@
-const { insert, list, loginHost, modify, remove} = require("../services/Users");
+const { insert, list, loginUser, modify, remove} = require("../services/Users");
 const httpStatus = require("http-status");
 const uuid = require("uuid");
 const { passwordToHash, generateAccessToken, generateRefreshToken } = require("../scripts/utils/helper");
@@ -26,7 +26,7 @@ const index = (req, res) => {
 
 const login = (req, res) => {
    req.body.password = passwordToHash(req.body.password);
-    loginHost(req.body) 
+    loginUser(req.body) 
         .then((user) => {
             if(!user) return res.status(httpStatus.NOT_FOUND).send({ message : "Böyle bir kullanıcı bulunmamaktadır."})
             user = {
@@ -61,7 +61,13 @@ const resetPassword = (req,res) => {
 };
 
 const update = (req, res) => {
-    modify({ id : req.user?._id }, req.body)
+
+    if (!req.user) {
+        res.status(httpStatus.UNAUTHORIZED).send({ error: "Kullanıcı oturum açmamış." });
+        return;
+    }
+
+    modify({ id : req.user._id }, req.body)
         .then((updatedUser) => {
             res.status(httpStatus.OK).send(updatedUser);
         })
