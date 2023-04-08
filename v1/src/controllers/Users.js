@@ -43,13 +43,13 @@ const login = (req, res) => {
 
 const resetPassword = (req,res) => {
     const new_password = uuid.v4()?.split("-")[0] || `usr-${new Date().getTime()}`;
-    modify({email : req.body.email}, {password : passwordToHash(new_password)})
-        .then((user) => {
-            if(!user) {
+    modify({email : req.body.email, password : passwordToHash(new_password)})
+        .then((updatedUser) => {
+            if(!updatedUser) {
                 return res.status(httpStatus.NOT_FOUND).send({ error : "Böyle bir kullanıcı bulunmamaktadır."});
             }
             eventEmitter.emit("send_email", {
-                to: user.email,
+                to: updatedUser.email,
                 subject: "Şifre Sıfırlama",
                 html : `Talebiniz üzerine şifre sıfırlama işleminiz gerçekleşmiştir. <br /> Giriş yaptıktan sonra şifrenizi değiştirmeyi unutmayın! <br /> Yeni Şifreniz : <b>${new_password}`
             });
@@ -61,8 +61,7 @@ const resetPassword = (req,res) => {
 };
 
 const update = (req, res) => {
-    //modify({ _id : req.user?._id }, req.body.user._id)
-    modify({_id:req.body.user._doc},req.body)
+    modify(req.user._doc._id,req.body)
         .then((updatedUser) => {
             res.status(httpStatus.OK).send(updatedUser);
         })
@@ -90,20 +89,12 @@ const deleteUser = (req, res) => {
 };
 
 const changePassword = (req, res) => {
-
-    if (req.user && req.user._id === req.params.id) {
-      console.log("Sifrelenmemis hali : ",req.body.password);
+    if (req.user && req.user._doc._id === req.params.id) {
       if (req.body.password) {
           req.body.password = passwordToHash(req.body.password);
       }
-  
-      console.log("Sifrelenmis hali : ",req.body.password);
-  
-      console.log("req : " , req);
-  
       modify(req.params.id, req.body)
         .then((result) => {
-          console.log("sonuc : ", result);
           res.status(httpStatus.OK).send(result);
         })
         .catch((err) => {
@@ -126,7 +117,7 @@ const updateProfileImage = (req,res) => {
     const folderPath = path.join(__dirname, "../", "uploads/users", fileName);
     req.files.profile_image.mv(folderPath, function (err) {
         if (err) return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: err});
-        modify({ id : req.user._id}, {profile_image: fileName})
+        modify(req.user._doc._id, {profile_image: fileName})
             .then((updatedUser) => {
                 res.status(httpStatus.OK).send(updatedUser);
             })
