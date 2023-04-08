@@ -10,17 +10,11 @@ const list = () => {
 }
 
 const loginUser = (loginData) => {
-    return User.findOne(loginData)
+    return User.findOne({email : loginData.email})
 }
 
 const modify = (userId, usersData) => {
     return User.findByIdAndUpdate(userId, usersData);
-  };
-
-  const modifyV2 = (userId, usersData) => {
-    const options = { new: true }; // sadece güncellenen alanları döndürmek için options nesnesi
-    return User.findByIdAndUpdate(userId, usersData, options)
-      .select('firstName lastName email'); // sadece firstName, lastName ve email alanlarını döndür
   };
 
 const remove = (id) => {

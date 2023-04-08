@@ -32,8 +32,8 @@ const login = (req, res) => {
             user = {
                 ...user.toObject(),
                 tokens : {
-                    access_token : generateAccessToken(user),
-                    refresh_token : generateRefreshToken(user),
+                    access_token : generateAccessToken(user.email),
+                    refresh_token : generateRefreshToken(user.email),
                 }
             }
             res.status(httpStatus.OK).send(user);
@@ -61,18 +61,8 @@ const resetPassword = (req,res) => {
 };
 
 const update = (req, res) => {
-
-    if (!req.user) {
-        res.status(httpStatus.UNAUTHORIZED).send({ error: "Kullanıcı oturum açmamış." });
-        return;
-    }
-    console.log("Kullanıcı oturum açmış görünüyor")
-    console.log("user idsi : ",req.user._id);
-    console.log("req : ", req);
-
-    modifyV2({ _id : req.user?._id }, req.body)
+    modify({ _id : req.user?._id }, req.body)
         .then((updatedUser) => {
-            console.log("updated USER : ")
             res.status(httpStatus.OK).send(updatedUser);
         })
         .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error : "Güncelleme işlemi sırasında bir problem oluştu."}))
