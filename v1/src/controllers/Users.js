@@ -32,8 +32,8 @@ const login = (req, res) => {
             user = {
                 ...user.toObject(),
                 tokens : {
-                    access_token : generateAccessToken(user.email),
-                    refresh_token : generateRefreshToken(user.email),
+                    access_token : generateAccessToken(user),
+                    refresh_token : generateRefreshToken(user),
                 }
             }
             res.status(httpStatus.OK).send(user);

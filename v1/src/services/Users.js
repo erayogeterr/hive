@@ -10,7 +10,7 @@ const list = () => {
 }
 
 const loginUser = (loginData) => {
-    return User.findOne({email : loginData.email})
+    return User.findOne(loginData)
 }
 
 const modify = (userId, usersData) => {
