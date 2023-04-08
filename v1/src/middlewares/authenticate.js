@@ -4,7 +4,7 @@ const JWT = require("jsonwebtoken")
  const authenticateToken = (req,res,next) => {
     const authHeader =  req.headers["authorization"]
     const token = authHeader && authHeader.split(" ")[1]
-    console.log(token);
+    console.log("Token Değeri :" ,token);
     if(!token) {
      return res.status(httpStatus.UNAUTHORIZED).send({ error : "Bu işlemi yapmak için ilk olarak giriş yapmalısınız."})
     }
@@ -12,7 +12,9 @@ const JWT = require("jsonwebtoken")
 
      JWT.verify(token, process.env.ACCESS_TOKEN_SECRET_KEY, (err, user) => {
       if(err) return res.status(httpStatus.FORBIDDEN).send({ error : "Token doğrulanamadı." })
+      Console.log("req user :" , req.user)
       req.user = user;
+      console.log("req user :", req.user)
       next();
      })
  }
