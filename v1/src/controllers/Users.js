@@ -44,10 +44,8 @@ const login = (req, res) => {
 
 const resetPassword = (req, res) => {
     const new_password = uuid.v4()?.split("-")[0] || `usr-${new Date().getTime()}`;
-    console.log(req.body.email)
     modifyWhere({ email: req.body.email }, { password: passwordToHash(new_password) })
         .then((updatedUser) => {
-            console.log(updatedUser);
             if (!updatedUser) {
                 return res.status(httpStatus.NOT_FOUND).send({ error: "Böyle bir kullanıcı bulunmamaktadır." });
             }
