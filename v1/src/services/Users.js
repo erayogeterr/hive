@@ -6,7 +6,7 @@ const insert = (data) => {
 }
 
 const list = () => {
-   return User.find({});
+    return User.find({});
 }
 
 const loginUser = (loginData) => {
@@ -14,8 +14,12 @@ const loginUser = (loginData) => {
 }
 
 const modify = (userId, usersData) => {
-    return User.findByIdAndUpdate(userId, usersData, {new : true});
+    return User.findByIdAndUpdate(userId, usersData, { new: true });
 };
+
+const modifyWhere = (where, data) => {
+    return User.findOneAndUpdate(where, data, { new: true });
+}
 
 const remove = (id) => {
     return User.findByIdAndDelete(id);
@@ -27,4 +31,5 @@ module.exports = {
     loginUser,
     modify,
     remove,
+    modifyWhere,
 }

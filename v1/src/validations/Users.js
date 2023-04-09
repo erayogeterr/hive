@@ -4,7 +4,7 @@ const createValidation = Joi.object({
     firstName: Joi.string().required().min(3),
     lastName: Joi.string().required().min(3),
     email: Joi.string().email().required().min(8),
-    password :Joi.string().required().min(8),
+    password: Joi.string().required().min(8),
 })
 
 const updateValidation = Joi.object({
@@ -15,18 +15,18 @@ const updateValidation = Joi.object({
 
 
 const loginValidation = Joi.object({
-    email : Joi.string().email().required().min(8),
-    password : Joi.string().required().min(8),
+    email: Joi.string().email().required().min(8),
+    password: Joi.string().required().min(8),
 });
 
 const resetPasswordValidation = Joi.object({
-    email : Joi.string().email().required().min(8),
-    
+    email: Joi.string().email().required().min(8),
+
 });
 
 const changePasswordValidation = Joi.object({
-    password : Joi.string().required().min(8),
-    
+    password: Joi.string().required().min(8),
+
 });
 
 module.exports = {
