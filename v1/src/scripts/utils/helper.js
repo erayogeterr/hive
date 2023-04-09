@@ -3,14 +3,14 @@ const JWT = require("jsonwebtoken");
 
 const passwordToHash = (password) => {
     return CryptoJS.HmacSHA256(password, CryptoJS.HmacSHA1(password, process.env.PASSWORD_HASH).toString()).toString();
- };
- 
- const generateAccessToken = (user) => {
-    return JWT.sign({name : user.email, ...user}, process.env.ACCESS_TOKEN_SECRET_KEY, {expiresIn: "1w"}) //şifrelendiriyor ama isimlendirmekde gerekiyor. key'i name.  
-    
+};
+
+const generateAccessToken = (user) => {
+    return JWT.sign({ name: user.email, ...user }, process.env.ACCESS_TOKEN_SECRET_KEY, { expiresIn: "1w" }) //şifrelendiriyor ama isimlendirmekde gerekiyor. key'i name.  
+
 }
 const generateRefreshToken = (user) => {
-    return JWT.sign({name : user.email, ...user}, process.env.REFRESH_TOKEN_SECRET_KEY)
+    return JWT.sign({ name: user.email, ...user }, process.env.REFRESH_TOKEN_SECRET_KEY)
 }
 
 

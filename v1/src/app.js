@@ -4,7 +4,7 @@ const helmet = require("helmet")
 const config = require("./config");
 const loaders = require("./loaders");
 const events = require("./scripts/events");
-const { HostRoutes, UserRoutes } = require("./api-routes");
+const { UserRoutes } = require("./api-routes");
 const cors = require("cors")
 const path = require("path");
 
@@ -21,7 +21,5 @@ app.use(fileUpload());
 
 app.listen(process.env.APP_PORT || 8000, () => {
     console.log("Sunucu ayağa kalktı.");
-    app.use("/hosts", HostRoutes);
     app.use("/users", UserRoutes);
 })
-  
