@@ -1,15 +1,17 @@
-const Mongoose = require("mongoose");
-const RoomSchema = new Mongoose.Schema({
+ const Mongoose = require("mongoose");
 
-    password: {
-        type : String,
-        require : true,
-    },
+ const RoomSchema = new Mongoose.Schema({
 
-    participants: [{
-      type: Mongoose.Schema.Types.ObjectId,
-      ref: "Participant"
-    }],
-}, { timestamps: true, versionKey: false });
+     password: {
+         type : String,
+         required : true,
+     },
 
-module.exports = Mongoose.model("room", RoomSchema);
+     participants: [{
+       //type: Mongoose.Schema.Types.ObjectId,
+       type: String,
+       ref: "Participant"
+     }],
+ }, { timestamps: true, versionKey: false });
+
+ module.exports = Mongoose.model("room", RoomSchema);
