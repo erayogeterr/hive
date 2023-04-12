@@ -25,6 +25,7 @@ const remove = (id) => {
     return User.findByIdAndDelete(id);
 }
 
+
 module.exports = {
     insert,
     list,

@@ -4,8 +4,8 @@ const { passwordToHash } = require("../scripts/utils/helper");
 const Rooms = require("../models/Rooms");
 const Participant = require('../models/Participants');
 
+
 const create = (req, res) => {
-    // req.body.password = passwordToHash(req.body.password);
     const { eventName, eventDescription, lessonName } = req.body;
 
     if (!eventName || !eventDescription || !lessonName) {
@@ -16,10 +16,10 @@ const create = (req, res) => {
         eventName,
         eventDescription,
         lessonName,
-        createdBy: req.user._doc._id // Ekledik
+        createdBy: req.user._doc._id 
     };
 
-    insert(room)//(req.body)
+    insert(room)
         .then((response) => {
             res.status(httpStatus.CREATED).send(response);
         })
@@ -60,36 +60,6 @@ const deleteRoom = (req, res) => {
         })
         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Silme işlemi sırasında hata ile karşılaşıldı." }));
 }
-
-// const JoinRoom = async (req, res) => {
-//     try {
-//         const roomId = req.params.id // roomId'yi parametre olarak al
-//         const password = passwordToHash(req.body.password); // password'u istek gövdesinden al
-
-//         // Oda ID'sini kullanarak odayı bul
-//         const room = await Rooms.findById(roomId);
-
-//         // Şifreyi kontrol et
-//         if (room.password !== password) {
-//             return res.status(httpStatus.UNAUTHORIZED).send({ message: 'Geçersiz şifre' });
-//         }
-
-//         // Yeni bir katılımcı oluştur ve odaya ekle
-//         const participant = new Participant({room: room.id});
-//         await participant.save();
-
-//         let participants = room.participants || [];
-//         participants.push(participant.name);
-//         room.participants = participants;
-
-//         await room.save();
-
-//         return res.status(httpStatus.CREATED).send({ message: 'Katılımcı başarıyla eklendi' });
-//     } catch (err) {
-//         console.error(err);
-//         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: 'Sunucu hatası' });
-//     }
-// };
 
 const JoinRoom = async (req, res) => {
 
