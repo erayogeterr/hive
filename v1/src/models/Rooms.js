@@ -3,11 +3,6 @@
 
  const RoomSchema = new Mongoose.Schema({
 
-    //  password: {
-    //      type : String,
-    //      required : true,
-    //  },
-
     code: {
       type: String,
       default: shortid.generate,
@@ -34,7 +29,6 @@
     },
 
      participants: [{
-       //type: Mongoose.Schema.Types.ObjectId,
        type: String,
        ref: "Participant"
      }],

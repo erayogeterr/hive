@@ -2,7 +2,7 @@ const httpStatus = require("http-status");
 const uuid = require("uuid");
 const eventEmitter = require("../scripts/events/eventEmitter");
 const path = require("path");
-
+const Users = require("../models/Users");
 const { passwordToHash, generateAccessToken, generateRefreshToken } = require("../scripts/utils/helper");
 const { insert, list, loginUser, modify, remove, modifyWhere } = require("../services/Users");
 
@@ -29,14 +29,14 @@ const login = (req, res) => {
     req.body.password = passwordToHash(req.body.password);
     loginUser(req.body)
         .then((user) => {
-            if (!user) return res.status(httpStatus.NOT_FOUND).send({ message: "Böyle bir kullanıcı bulunmamaktadır." })
+            if (!user) return res.status(httpStatus.NOT_FOUND).send({ message: "Böyle bir kullanıcı bulunmamaktadır. Mail adresiniz veya şifreniz yanlış olabilir." })
             user = {
                 ...user.toObject(),
                 tokens: {
                     access_token: generateAccessToken(user),
                     refresh_token: generateRefreshToken(user),
-                }
-            }
+                },
+            };
             res.status(httpStatus.OK).send(user);
         })
         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
@@ -77,7 +77,7 @@ const deleteUser = (req, res) => {
     }
 
     if (req.user && req.user._doc._id === req.params.id) {
-        remove(req.params?.id)
+        remove(req.params.id)
             .then((deletedItem) => {
                 if (!deletedItem) {
                     return res.status(httpStatus.NOT_FOUND).send({
@@ -90,28 +90,64 @@ const deleteUser = (req, res) => {
             })
             .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Silme işlemi sırasında hata ile karşılaşıldı." }));
     } else {
-        res.status(httpStatus.UNAUTHORIZED).send({error : "Bu eylemi gerçekleştirmek için yetkiniz yok."});
+        res.status(httpStatus.UNAUTHORIZED).send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
     }
-
-
 };
 
-const changePassword = (req, res) => {
+
+//  const changePassword = (req, res) => {
+//      if (req.user && req.user._doc._id === req.params.id) {
+//          if (req.body.password) {
+//              req.body.password = passwordToHash(req.body.password);
+//          }
+//          modify(req.params.id, req.body)
+//              .then((result) => {
+//                  res.status(httpStatus.OK).send(result);
+//              })
+//              .catch((err) => {
+//                  res.status(httpStatus.NOT_FOUND).send(err);
+//              });
+//      } else {
+//          res.status(httpStatus.UNAUTHORIZED).send({error : "Bu eylemi gerçekleştirmek için yetkiniz yok."});
+//      }
+//  };
+
+const changePassword = async (req, res) => {
+
+    const userId = req.params.id;
+    const oldPassword = req.body.oldpassword;
+    const newPassword = req.body.newpassword;
+    const oldPasswordHash = passwordToHash(oldPassword);
+
+
     if (req.user && req.user._doc._id === req.params.id) {
-        if (req.body.password) {
-            req.body.password = passwordToHash(req.body.password);
+        try {
+            const user = await Users.findById(userId);
+            if (!user) {
+                return res.status(httpStatus.NOT_FOUND).send({error : "Kullanıcı bulunamadı."});
+            }
+    
+            if (oldPasswordHash !== user.password) {
+                return res.status(httpStatus.BAD_REQUEST).send({error : "Eski şifreniz yanlış."});
+            }
+    
+            // Eski şifre doğru, yeni şifre hashleniyor ve kaydediliyor
+            const newPasswordHash = passwordToHash(newPassword);
+            user.password = newPasswordHash;
+            await user.save();
+    
+            return res.status(httpStatus.OK).send({error : "Şifreniz başarıyla değiştirildi."});
+        } catch (error) {
+            console.error(error);
+            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error : "Şifreniz değiştirilirken bir hata ile karşılaşıldı."});
         }
-        modify(req.params.id, req.body)
-            .then((result) => {
-                res.status(httpStatus.OK).send(result);
-            })
-            .catch((err) => {
-                res.status(httpStatus.NOT_FOUND).send(err);
-            });
     } else {
         res.status(httpStatus.UNAUTHORIZED).send({error : "Bu eylemi gerçekleştirmek için yetkiniz yok."});
     }
 };
+
+
+
 
 const updateProfileImage = (req, res) => {
     //Resim Kontrol
@@ -140,6 +176,6 @@ module.exports = {
     resetPassword,
     update,
     deleteUser,
-    changePassword,
     updateProfileImage,
+    changePassword,
 }
