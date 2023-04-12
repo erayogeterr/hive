@@ -5,8 +5,21 @@ const Rooms = require("../models/Rooms");
 const Participant = require('../models/Participants');
 
 const create = (req, res) => {
-    req.body.password = passwordToHash(req.body.password);
-    insert(req.body)
+    // req.body.password = passwordToHash(req.body.password);
+    const { eventName, eventDescription, lessonName } = req.body;
+
+    if (!eventName || !eventDescription || !lessonName) {
+        return res.status(httpStatus.BAD_REQUEST).send({ error: "Activity name, description and lesson name are required." });
+    }
+
+    const room = {
+        eventName,
+        eventDescription,
+        lessonName,
+        createdBy: req.user._doc._id // Ekledik
+    };
+
+    insert(room)//(req.body)
         .then((response) => {
             res.status(httpStatus.CREATED).send(response);
         })
@@ -48,36 +61,68 @@ const deleteRoom = (req, res) => {
         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Silme işlemi sırasında hata ile karşılaşıldı." }));
 }
 
+// const JoinRoom = async (req, res) => {
+//     try {
+//         const roomId = req.params.id // roomId'yi parametre olarak al
+//         const password = passwordToHash(req.body.password); // password'u istek gövdesinden al
+
+//         // Oda ID'sini kullanarak odayı bul
+//         const room = await Rooms.findById(roomId);
+
+//         // Şifreyi kontrol et
+//         if (room.password !== password) {
+//             return res.status(httpStatus.UNAUTHORIZED).send({ message: 'Geçersiz şifre' });
+//         }
+
+//         // Yeni bir katılımcı oluştur ve odaya ekle
+//         const participant = new Participant({room: room.id});
+//         await participant.save();
+
+//         let participants = room.participants || [];
+//         participants.push(participant.name);
+//         room.participants = participants;
+
+//         await room.save();
+
+//         return res.status(httpStatus.CREATED).send({ message: 'Katılımcı başarıyla eklendi' });
+//     } catch (err) {
+//         console.error(err);
+//         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: 'Sunucu hatası' });
+//     }
+// };
+
 const JoinRoom = async (req, res) => {
-    try {
-        const roomId = req.params.id // roomId'yi parametre olarak al
-        const password = passwordToHash(req.body.password); // password'u istek gövdesinden al
 
-        // Oda ID'sini kullanarak odayı bul
-        const room = await Rooms.findById(roomId);
+    const code = req.params.code;
 
-        // Şifreyi kontrol et
-        if (room.password !== password) {
-            return res.status(httpStatus.UNAUTHORIZED).send({ message: 'Geçersiz şifre' });
-        }
+    const room = await Rooms.findOne({ code });
 
-        // Yeni bir katılımcı oluştur ve odaya ekle
-        const participant = new Participant({room: room.id});
-        await participant.save();
-
-        let participants = room.participants || [];
-        participants.push(participant.name);
-        room.participants = participants;
-
-        await room.save();
-
-        return res.status(httpStatus.CREATED).send({ message: 'Katılımcı başarıyla eklendi' });
-    } catch (err) {
-        console.error(err);
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: 'Sunucu hatası' });
+    if (!room) {
+        return res.status(httpStatus.NOT_FOUND).json({ message: 'Geçersiz kod' });
     }
+    const participant = new Participant({ room: room.id });
+    await participant.save();
+
+    let participants = room.participants || [];
+    participants.push(participant.name);
+    room.participants = participants;
+
+    await room.save();
+
+    return res.status(httpStatus.OK).json({ message: 'Katılım başarılı.', participant });
 };
 
+const getUserRooms = (req, res) => {
+    const { id } = req.params;
+  
+    Rooms.find({ createdBy: id })
+      .then((rooms) => {
+        res.status(httpStatus.OK).json(rooms);
+      })
+      .catch((err) => {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err.message });
+      });
+  }
 
 module.exports = {
     create,
@@ -85,4 +130,5 @@ module.exports = {
     getByIdRoom,
     deleteRoom,
     JoinRoom,
+    getUserRooms,
 }
