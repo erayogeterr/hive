@@ -7,6 +7,7 @@ const UserSchema = new Mongoose.Schema({
     email: String,
     password: String,
     profile_image: String,
+    rooms: [{ type: Mongoose.Schema.Types.ObjectId, ref: 'room' }], 
 
 }, { timestamps: true, versionKey: false });
 
