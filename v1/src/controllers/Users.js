@@ -6,42 +6,24 @@ const Users = require("../models/Users");
 const { passwordToHash, generateAccessToken, generateRefreshToken } = require("../scripts/utils/helper");
 const { insert, list, loginUser, modify, remove, modifyWhere } = require("../services/Users");
 
-// const create = (req, res) => {
-    
-//     req.body.password = passwordToHash(req.body.password);
-//     insert(req.body)
-//         .then((response) => {
-//             res.status(httpStatus.CREATED).send(response);
-//         })
-//         .catch((e) => {
-//             res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e);
-//         });
-// };
-
 const create = async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
-  
-    // Check if email already exists
+
     const existingUser = await Users.findOne({ email }).exec();
     if (existingUser) {
-      return res.status(httpStatus.CONFLICT).json({ message: 'Email daha önce kullanılmış.' });
+        return res.status(httpStatus.CONFLICT).send({ error: 'Email daha önce kullanılmış.' });
     }
-  
+
     const hashedPassword = passwordToHash(password);
-    const newUser = new Users({
-      firstName,
-      lastName,
-      email,
-      password: hashedPassword,
-    });
-  
+    const newUser = new Users({ firstName, lastName, email, password: hashedPassword, });
+
     try {
-      const savedUser = await newUser.save();
-      res.status(httpStatus.CREATED).json(savedUser);
+        const savedUser = await insert(newUser);
+        res.status(httpStatus.CREATED).json(savedUser);
     } catch (err) {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send(err);
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send(err);
     }
-  };
+};
 
 
 const index = (req, res) => {
@@ -151,30 +133,27 @@ const changePassword = async (req, res) => {
         try {
             const user = await Users.findById(userId);
             if (!user) {
-                return res.status(httpStatus.NOT_FOUND).send({error : "Kullanıcı bulunamadı."});
+                return res.status(httpStatus.NOT_FOUND).send({ error: "Kullanıcı bulunamadı." });
             }
-    
+
             if (oldPasswordHash !== user.password) {
-                return res.status(httpStatus.BAD_REQUEST).send({error : "Eski şifreniz yanlış."});
+                return res.status(httpStatus.BAD_REQUEST).send({ error: "Eski şifreniz yanlış." });
             }
-    
+
             // Eski şifre doğru, yeni şifre hashleniyor ve kaydediliyor
             const newPasswordHash = passwordToHash(newPassword);
             user.password = newPasswordHash;
             await user.save();
-    
-            return res.status(httpStatus.OK).send({error : "Şifreniz başarıyla değiştirildi."});
+
+            return res.status(httpStatus.OK).send({ error: "Şifreniz başarıyla değiştirildi." });
         } catch (error) {
             console.error(error);
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error : "Şifreniz değiştirilirken bir hata ile karşılaşıldı."});
+            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Şifreniz değiştirilirken bir hata ile karşılaşıldı." });
         }
     } else {
-        res.status(httpStatus.UNAUTHORIZED).send({error : "Bu eylemi gerçekleştirmek için yetkiniz yok."});
+        res.status(httpStatus.UNAUTHORIZED).send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
     }
 };
-
-
-
 
 const updateProfileImage = (req, res) => {
     //Resim Kontrol
@@ -195,6 +174,7 @@ const updateProfileImage = (req, res) => {
             .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Upload başarılı fakat kayıt sırasında bir problem oluştu." }))
     });
 };
+
 
 module.exports = {
     create,
