@@ -8,23 +8,23 @@ const Joi = require("joi");
 // })
 
 const createValidation = Joi.object({
-    firstName: Joi.string().trim().required().min(3).empty('').messages({
+    firstName: Joi.string().trim().required().min(3).messages({
         'any.required': 'Adınızı giriniz.',
         'string.min': 'Adınız en az 3 karakter içermelidir.',
         'string.empty': 'İsim alanı boş geçilemez',
     }),
-    lastName: Joi.string().trim().required().min(3).empty('').messages({
+    lastName: Joi.string().trim().required().min(3).messages({
         'any.required': 'Soyadınızı giriniz.',
         'string.min': 'Soyadınız en az 3 karakter içermelidir.',
         'string.empty': 'Soyisim alanı boş geçilemez',
     }),
-    email: Joi.string().trim().email().required().min(8).empty('').messages({
+    email: Joi.string().trim().email().required().min(8).messages({
         'any.required': 'E-posta adresinizi giriniz.',
         'string.email': 'Lütfen geçerli bir e-posta adresi giriniz.',
         'string.min': 'E-posta adresiniz en az 8 karakter içermelidir.',
         'string.empty': 'Email alanı boş geçilemez',
     }),
-    password: Joi.string().trim().required().min(8).empty('').messages({
+    password: Joi.string().trim().required().min(8).messages({
         'any.required': 'Şifrenizi giriniz.',
         'string.min': 'Şifreniz en az 8 karakter içermelidir.',
         'string.empty': 'Şifre alanı boş geçilemez',
