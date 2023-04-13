@@ -6,16 +6,43 @@ const Users = require("../models/Users");
 const { passwordToHash, generateAccessToken, generateRefreshToken } = require("../scripts/utils/helper");
 const { insert, list, loginUser, modify, remove, modifyWhere } = require("../services/Users");
 
-const create = (req, res) => {
-    req.body.password = passwordToHash(req.body.password);
-    insert(req.body)
-        .then((response) => {
-            res.status(httpStatus.CREATED).send(response);
-        })
-        .catch((e) => {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e);
-        });
-};
+// const create = (req, res) => {
+    
+//     req.body.password = passwordToHash(req.body.password);
+//     insert(req.body)
+//         .then((response) => {
+//             res.status(httpStatus.CREATED).send(response);
+//         })
+//         .catch((e) => {
+//             res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e);
+//         });
+// };
+
+const create = async (req, res) => {
+    const { firstName, lastName, email, password } = req.body;
+  
+    // Check if email already exists
+    const existingUser = await Users.findOne({ email }).exec();
+    if (existingUser) {
+      return res.status(httpStatus.CONFLICT).json({ message: 'Email daha önce kullanılmış.' });
+    }
+  
+    const hashedPassword = passwordToHash(password);
+    const newUser = new Users({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+    });
+  
+    try {
+      const savedUser = await newUser.save();
+      res.status(httpStatus.CREATED).json(savedUser);
+    } catch (err) {
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send(err);
+    }
+  };
+
 
 const index = (req, res) => {
     list()
