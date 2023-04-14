@@ -14,6 +14,13 @@ const authenticateToken = (req, res, next) => {
             return res.status(httpStatus.FORBIDDEN).send({ error: "Token doğrulanamadı." })
         }
         req.user = user;
+
+        const refreshToken = req.headers["x-refresh-token"];
+        if (refreshToken) {
+          // eğer refresh token varsa, kullanıcının refresh token'ını req.user nesnesine ekle
+          req.user.refreshToken = refreshToken;
+        }
+        
         next();
     })
 }

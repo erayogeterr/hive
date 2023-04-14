@@ -4,7 +4,7 @@ const eventEmitter = require("../scripts/events/eventEmitter");
 const path = require("path");
 const Users = require("../models/Users");
 const { passwordToHash, generateAccessToken, generateRefreshToken } = require("../scripts/utils/helper");
-const { insert, list, loginUser, modify, remove, modifyWhere } = require("../services/Users");
+const { insert, list, loginUser, modify, remove, modifyWhere, getUserById } = require("../services/Users");
 
 const create = async (req, res) => {
     const { firstName, lastName, email, password } = req.body;
@@ -33,6 +33,17 @@ const index = (req, res) => {
         })
         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
 };
+
+const getOneUser = (req, res) => {
+    const user = req.user._doc;
+    const accessToken = req.headers.authorization.split(' ')[1];
+    const refreshToken = req.user.refreshToken;
+    res.send({
+        user,
+        accessToken,
+        refreshToken
+    });
+}
 
 const login = (req, res) => {
     req.body.password = passwordToHash(req.body.password);
@@ -185,4 +196,5 @@ module.exports = {
     deleteUser,
     updateProfileImage,
     changePassword,
+    getOneUser,
 }
