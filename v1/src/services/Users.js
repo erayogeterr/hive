@@ -9,6 +9,10 @@ const list = () => {
     return User.find({});
 }
 
+const getUserById = (id) => {
+    return User.findById(id);
+}
+
 const loginUser = (loginData) => {
     return User.findOne(loginData)
 }
@@ -33,4 +37,5 @@ module.exports = {
     modify,
     remove,
     modifyWhere,
+    getUserById
 }
