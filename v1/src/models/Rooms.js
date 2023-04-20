@@ -25,7 +25,7 @@
 
     createdBy: {
       type: Mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
     },
 
      participants: [{

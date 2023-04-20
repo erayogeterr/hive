@@ -2,6 +2,7 @@ const httpStatus = require("http-status");
 const { insert, list, listIdRoom, remove } = require("../services/Rooms");
 const { passwordToHash } = require("../scripts/utils/helper");
 const Rooms = require("../models/Rooms");
+const User = require("../models/Users");
 const Participant = require('../models/Participants');
 
 
@@ -9,7 +10,7 @@ const create = (req, res) => {
     const { eventName, eventDescription, lessonName } = req.body;
 
     if (!eventName || !eventDescription || !lessonName) {
-        return res.status(httpStatus.BAD_REQUEST).send({ error: "Activity name, description and lesson name are required." });
+        return res.status(httpStatus.BAD_REQUEST).send({ error: "Aktivite adı, aktivete açıklaması ve Ders adı girilmesi zorunludur." });
     }
 
     const room = {
@@ -38,11 +39,41 @@ const index = (req, res) => {
 
 const getByIdRoom = (req, res) => {
     if (req.params.id) {
-        listIdRoom(req.params.id)
-            .then((response) => {
-                res.status(httpStatus.OK).send(response);
+        Rooms.findById(req.params.id)
+            .populate({
+                path: 'createdBy',
+                model: User,
+                select: 'email firstName lastName'
             })
-            .catch((e) => res.status(httpStatus.NOT_FOUND).send({ error: "Aradığınız Oda Bulunamadı." }))
+            .then((room) => {
+                console.log(room);
+                if (!room) {
+                    return res.status(httpStatus.NOT_FOUND).send({ error: "Aradığınız Oda Bulunamadı." });
+                }
+                if (!room.createdBy) {
+                    return res.status(httpStatus.NOT_FOUND).send({ error: "Oda Sahibi Bulunamadı." });
+                }
+                res.status(httpStatus.OK).send({
+                    id: room.id,
+                    eventName : room.eventName,
+                    eventDescription : room.eventDescription,
+                    lessonName : room.lessonName,
+                    participants : room.participants,
+                    code : room.code,
+                    createdAt: room.createdAt,
+                    updatedAt: room.updatedAt,
+                    createdBy: {
+                        id : room.createdBy.id,
+                        email: room.createdBy.email,
+                        firstName: room.createdBy.firstName,
+                        lastName: room.createdBy.lastName,
+                    }
+                });
+            })
+            .catch((e) => {
+                console.log(e);
+                res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Oda Getirilirken Hata Oluştu." });
+            });
     } else {
         res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Oda Getirilirken Hata Oluştu." });
     }
@@ -68,7 +99,7 @@ const JoinRoom = async (req, res) => {
     const room = await Rooms.findOne({ code });
 
     if (!room) {
-        return res.status(httpStatus.NOT_FOUND).json({ message: 'Geçersiz kod' });
+        return res.status(httpStatus.NOT_FOUND).send({ error: 'Geçersiz kod' });
     }
     const participant = new Participant({ room: room.id });
     await participant.save();
@@ -79,18 +110,19 @@ const JoinRoom = async (req, res) => {
 
     await room.save();
 
-    return res.status(httpStatus.OK).json({ message: 'Katılım başarılı.', participant });
+    return res.status(httpStatus.OK).send({ message: 'Katılım başarılı.', participant });
 };
+
 
 const getUserRooms = (req, res) => {
     const { id } = req.params;
   
     Rooms.find({ createdBy: id })
       .then((rooms) => {
-        res.status(httpStatus.OK).json(rooms);
+        res.status(httpStatus.OK).send(rooms);
       })
       .catch((err) => {
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).json({ error: err.message });
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Oda getirilirken hata ile karşılaşlıldı." });
       });
   }
 
