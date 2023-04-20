@@ -25,7 +25,6 @@ const create = async (req, res) => {
     }
 };
 
-
 const index = (req, res) => {
     list()
         .then((response) => {
@@ -49,7 +48,7 @@ const login = (req, res) => {
     req.body.password = passwordToHash(req.body.password);
     loginUser(req.body)
         .then((user) => {
-            if (!user) return res.status(httpStatus.NOT_FOUND).send({ message: "Böyle bir kullanıcı bulunmamaktadır. Mail adresiniz veya şifreniz yanlış olabilir." })
+            if (!user) return res.status(httpStatus.NOT_FOUND).send({ message: "Girilen kullanıcı adı ya da şifre hatalı. Lütfen girdiğiniz bilgileri kontrol ederek tekrar deneyiniz." })
             user = {
                 ...user.toObject(),
                 tokens: {
@@ -138,7 +137,6 @@ const changePassword = async (req, res) => {
     const oldPassword = req.body.oldpassword;
     const newPassword = req.body.newpassword;
     const oldPasswordHash = passwordToHash(oldPassword);
-
 
     if (req.user && req.user._doc._id === req.params.id) {
         try {

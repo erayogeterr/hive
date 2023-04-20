@@ -49,6 +49,8 @@ const updateValidation = Joi.object({
 });
 
 
+
+
 // const loginValidation = Joi.object({
 //     email: Joi.string().email().required().min(8),
 //     password: Joi.string().required().min(8),
