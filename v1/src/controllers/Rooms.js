@@ -29,13 +29,13 @@ const create = (req, res) => {
         });
 }
 
-const index = (req, res) => {
-    list()
-        .then((response) => {
-            res.status(httpStatus.OK).send(response);
-        })
-        .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
-};
+ const index = (req, res) => {
+     list()
+         .then((response) => {
+             res.status(httpStatus.OK).send(response);
+         })
+         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
+ };
 
 const getByIdRoom = (req, res) => {
     if (req.params.id) {

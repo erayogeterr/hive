@@ -5,9 +5,12 @@ const insert = (data) => {
     return room.save(); 
 }
 
-const list = () => {
-    return Room.find({});
-}
+ const list = () => {
+     return Room.find({});
+ }
+
+
+
 
 const listIdRoom = (id) => {
     return Room.findById(id);
