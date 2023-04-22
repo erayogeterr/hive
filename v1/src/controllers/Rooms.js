@@ -46,7 +46,6 @@ const getByIdRoom = (req, res) => {
                 select: 'email firstName lastName'
             })
             .then((room) => {
-                console.log(room);
                 if (!room) {
                     return res.status(httpStatus.NOT_FOUND).send({ error: "Aradığınız Oda Bulunamadı." });
                 }
@@ -99,7 +98,7 @@ const JoinRoom = async (req, res) => {
     const room = await Rooms.findOne({ code });
 
     if (!room) {
-        return res.status(httpStatus.NOT_FOUND).send({ error: 'Geçersiz kod' });
+        return res.status(httpStatus.NOT_FOUND).send({ message: 'Geçersiz kod' });
     }
     const participant = new Participant({ room: room.id });
     await participant.save();

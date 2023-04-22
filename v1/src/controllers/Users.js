@@ -25,7 +25,7 @@ const create = async (req, res) => {
     }
 };
 
-const index = (req, res) => {
+const index = (req, res) => { 
     list()
         .then((response) => {
             res.status(httpStatus.OK).send(response);
