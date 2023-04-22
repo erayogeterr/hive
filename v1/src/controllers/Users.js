@@ -85,7 +85,7 @@ const update = (req, res) => {
         .then((updatedUser) => {
             res.status(httpStatus.OK).send(updatedUser);
         })
-        .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Güncelleme işlemi sırasında bir problem oluştu." }))
+        .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: "Güncelleme işlemi sırasında bir problem oluştu." }))
 };
 
 const deleteUser = (req, res) => {
