@@ -29,13 +29,58 @@ const create = (req, res) => {
         });
 }
 
- const index = (req, res) => {
-     list()
-         .then((response) => {
-             res.status(httpStatus.OK).send(response);
-         })
-         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
- };
+//  const index = (req, res) => {
+//      list()
+//          .then((response) => {
+//              res.status(httpStatus.OK).send(response);
+//          })
+//          .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
+//  };
+
+const index = (req, res) => {
+    Rooms.find({})
+      .populate({
+        path: 'createdBy',
+        model: User,
+        select: 'email firstName lastName'
+      })
+      .then((rooms) => {
+        if (!rooms) {
+          return res.status(httpStatus.NOT_FOUND).send({ error: "Hiçbir Oda Bulunamadı." });
+        }
+  
+        const roomsList = rooms.map((room) => {
+            let createdBy = null; 
+            if (room.createdBy) { // // createdBy özelliğinin id özelliğine erişmeden önce kontrol edilir.
+              createdBy = {
+                id: room.createdBy.id,
+                email: room.createdBy.email,
+                firstName: room.createdBy.firstName,
+                lastName: room.createdBy.lastName,
+              };
+            }
+          
+            return {
+              id: room.id,
+              eventName: room.eventName,
+              eventDescription: room.eventDescription,
+              lessonName: room.lessonName,
+              participants: room.participants,
+              code: room.code,
+              createdAt: room.createdAt,
+              updatedAt: room.updatedAt,
+              createdBy: createdBy,
+            };
+          });
+  
+        res.status(httpStatus.OK).send(roomsList);
+      })
+      .catch((e) => {
+        console.log(e);
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Odalar Getirilirken Hata Oluştu." });
+      });
+  }
+
 
 const getByIdRoom = (req, res) => {
     if (req.params.id) {
