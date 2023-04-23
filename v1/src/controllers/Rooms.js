@@ -158,17 +158,34 @@ const JoinRoom = async (req, res) => {
 };
 
 
+// const getUserRooms = (req, res) => {
+//     const { id } = req.params;
+  
+//     Rooms.find({ createdBy: id })
+//       .then((rooms) => {
+//         res.status(httpStatus.OK).send(rooms);
+//       })
+//       .catch((err) => {
+//         res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Oda getirilirken hata ile karşılaşlıldı." });
+//       });
+//   }
+
 const getUserRooms = (req, res) => {
     const { id } = req.params;
-  
+
     Rooms.find({ createdBy: id })
-      .then((rooms) => {
-        res.status(httpStatus.OK).send(rooms);
-      })
-      .catch((err) => {
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Oda getirilirken hata ile karşılaşlıldı." });
-      });
-  }
+        .populate({
+            path: 'createdBy',
+            model: User,
+            select: 'email firstName lastName'
+        })
+        .then((rooms) => {
+            res.status(httpStatus.OK).send(rooms);
+        })
+        .catch((err) => {
+            res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Oda getirilirken hata ile karşılaşıldı." });
+        });
+}
 
 module.exports = {
     create,
