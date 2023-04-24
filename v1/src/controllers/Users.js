@@ -4,99 +4,198 @@ const eventEmitter = require("../scripts/events/eventEmitter");
 const path = require("path");
 const Users = require("../models/Users");
 const { passwordToHash, generateAccessToken, generateRefreshToken } = require("../scripts/utils/helper");
-const { insert, list, loginUser, modify, remove, modifyWhere, getUserById } = require("../services/Users");
+const { insert, list, loginUser, modify, remove, modifyWhere, } = require("../services/Users");
 
 const create = async (req, res) => {
-    const { firstName, lastName, email, password } = req.body;
-
-    const existingUser = await Users.findOne({ email }).exec();
-    if (existingUser) {
-        return res.status(httpStatus.CONFLICT).send({ error: 'Email daha önce kullanılmış.' });
-    }
-
-    const hashedPassword = passwordToHash(password);
-    const newUser = new Users({ firstName, lastName, email, password: hashedPassword, });
-
     try {
+        const { firstName, lastName, email, password } = req.body;
+        const existingUser = await Users.findOne({ email }).exec();
+
+        if (existingUser) {
+            return res.status(httpStatus.CONFLICT).send({ error: 'Email daha önce kullanılmış.' });
+        }
+
+        const hashedPassword = passwordToHash(password);
+        const newUser = new Users({ firstName, lastName, email, password: hashedPassword });
+
         const savedUser = await insert(newUser);
-        res.status(httpStatus.CREATED).json(savedUser);
+        return res.status(httpStatus.CREATED).send(savedUser);
+
+    } catch (err) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Kayıt sırasında bir hata ile karşılaşıldı." });
+    }
+};
+
+
+// const index = (req, res) => {
+//     list()
+//         .then((response) => {
+//             res.status(httpStatus.OK).send(response);
+//         })
+//         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
+// };
+
+const index = async (req, res) => {
+    try {
+        const response = await list();
+        return res.status(httpStatus.OK).send(response);
+    } catch (err) {
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(err);
+    }
+};
+
+// const getOneUser = (req, res) => {
+//     const user = req.user._doc;
+//     const accessToken = req.headers.authorization.split(' ')[1];
+//     const refreshToken = req.user.refreshToken;
+//     res.send({
+//         user,
+//         accessToken,
+//         refreshToken
+//     });
+// }
+
+const getOneUser = (req, res) => {
+    const { _doc: user, refreshToken } = req.user; //req.user objesinden _doc özelliği alarak user değişkenine atadık. ve req.userdan refresh tokenıda aldık.
+    const accessToken = req.headers.authorization.split(' ')[1];
+
+    const responseData = { user, accessToken, refreshToken };
+    res.send(responseData);
+};
+
+// const login = (req, res) => {
+//     req.body.password = passwordToHash(req.body.password);
+//     loginUser(req.body)
+//         .then((user) => {
+//             if (!user) return res.status(httpStatus.NOT_FOUND).send({ message: "Girilen kullanıcı adı ya da şifre hatalı. Lütfen girdiğiniz bilgileri kontrol ederek tekrar deneyiniz." })
+//             user = {
+//                 ...user.toObject(),
+//                 tokens: {
+//                     access_token: generateAccessToken(user),
+//                     refresh_token: generateRefreshToken(user),
+//                 },
+//             };
+//             res.status(httpStatus.OK).send(user);
+//         })
+//         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
+// };
+
+const login = async (req, res) => {
+    try {
+        const hashedPassword = passwordToHash(req.body.password);
+        const user = await loginUser({ ...req.body, password: hashedPassword }); // req.body'deki tüm özellikleri ... operatörü ile geçmiş oluyoruz.Email pass gibi.
+
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).send({ message: "Girilen kullanıcı adı ya da şifre hatalı. Lütfen girdiğiniz bilgileri kontrol ederek tekrar deneyiniz." });
+        }
+
+        const accessToken = generateAccessToken(user);
+        const refreshToken = generateRefreshToken(user);
+        const userWithTokens = { ...user.toObject(), tokens: { access_token: accessToken, refresh_token: refreshToken } }; //Mongoose modelinin JSON nesnesini alarak, userWithTokens adlı bir obje oluşturuyoruz.
+
+        res.status(httpStatus.OK).send(userWithTokens);
     } catch (err) {
         res.status(httpStatus.INTERNAL_SERVER_ERROR).send(err);
     }
 };
 
-const index = (req, res) => { 
-    list()
-        .then((response) => {
-            res.status(httpStatus.OK).send(response);
-        })
-        .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
+// const resetPassword = (req, res) => {
+//     const new_password = uuid.v4()?.split("-")[0] || `usr-${new Date().getTime()}`;
+//     modifyWhere({ email: req.body.email }, { password: passwordToHash(new_password) })
+//         .then((updatedUser) => {
+//             if (!updatedUser) {
+//                 return res.status(httpStatus.NOT_FOUND).send({ error: "Böyle bir kullanıcı bulunmamaktadır." });
+//             }
+//             eventEmitter.emit("send_email", {
+//                 to: updatedUser.email,
+//                 subject: "Şifre Sıfırlama",
+//                 html: `Talebiniz üzerine şifre sıfırlama işleminiz gerçekleşmiştir. <br /> Giriş yaptıktan sonra şifrenizi değiştirmeyi unutmayın! <br /> Yeni Şifreniz : <b>${new_password}`
+//             });
+//             res.status(httpStatus.OK).send({
+//                 message: "Şifre sıfırlama işlemi için sisteme kayıtlı e-posta adresinize gereken bilgileri gönderdik."
+//             })
+//         })
+//         .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Şifre resetleme sırasında bir problem oluştu." }));
+// };
+
+const resetPassword = async (req, res) => {
+    try {
+        const newPassword = uuid.v4()?.split("-")[0] || `usr-${new Date().getTime()}`;
+        const updatedUser = await modifyWhere({ email: req.body.email }, { password: passwordToHash(newPassword) });
+
+        if (!updatedUser) {
+            return res.status(httpStatus.NOT_FOUND).send({ error: "Böyle bir kullanıcı bulunmamaktadır." });
+        }
+
+        eventEmitter.emit("send_email", {
+            to: updatedUser.email,
+            subject: "Şifre Sıfırlama",
+            html: `Talebiniz üzerine şifre sıfırlama işleminiz gerçekleşmiştir. <br /> Giriş yaptıktan sonra şifrenizi değiştirmeyi unutmayın! <br /> Yeni Şifreniz : <b>${newPassword}`
+        });
+
+        res.status(httpStatus.OK).send({
+            message: "Şifre sıfırlama işlemi için sisteme kayıtlı e-posta adresinize gereken bilgileri gönderdik."
+        });
+    } catch (error) {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Şifre resetleme sırasında bir problem oluştu." });
+    }
 };
 
-const getOneUser = (req, res) => {
-    const user = req.user._doc;
-    const accessToken = req.headers.authorization.split(' ')[1];
-    const refreshToken = req.user.refreshToken;
-    res.send({
-        user,
-        accessToken,
-        refreshToken
-    });
-}
+// const update = (req, res) => {
+//     modify(req.user._doc._id, req.body)
+//         .then((updatedUser) => {
+//             res.status(httpStatus.OK).send(updatedUser);
+//         })
+//         .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: "Güncelleme işlemi sırasında bir problem oluştu." }))
+// };
 
-const login = (req, res) => {
-    req.body.password = passwordToHash(req.body.password);
-    loginUser(req.body)
-        .then((user) => {
-            if (!user) return res.status(httpStatus.NOT_FOUND).send({ message: "Girilen kullanıcı adı ya da şifre hatalı. Lütfen girdiğiniz bilgileri kontrol ederek tekrar deneyiniz." })
-            user = {
-                ...user.toObject(),
-                tokens: {
-                    access_token: generateAccessToken(user),
-                    refresh_token: generateRefreshToken(user),
-                },
-            };
-            res.status(httpStatus.OK).send(user);
-        })
-        .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
+const update = async (req, res) => {
+    try {
+        const userId = req.user._doc._id;
+        const updatedUser = await modify(userId, req.body);
+        res.status(httpStatus.OK).send(updatedUser);
+    } catch (err) {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: "Güncelleme işlemi sırasında bir problem oluştu." });
+    }
 };
 
-const resetPassword = (req, res) => {
-    const new_password = uuid.v4()?.split("-")[0] || `usr-${new Date().getTime()}`;
-    modifyWhere({ email: req.body.email }, { password: passwordToHash(new_password) })
-        .then((updatedUser) => {
-            if (!updatedUser) {
-                return res.status(httpStatus.NOT_FOUND).send({ error: "Böyle bir kullanıcı bulunmamaktadır." });
-            }
-            eventEmitter.emit("send_email", {
-                to: updatedUser.email,
-                subject: "Şifre Sıfırlama",
-                html: `Talebiniz üzerine şifre sıfırlama işleminiz gerçekleşmiştir. <br /> Giriş yaptıktan sonra şifrenizi değiştirmeyi unutmayın! <br /> Yeni Şifreniz : <b>${new_password}`
-            });
-            res.status(httpStatus.OK).send({
-                message: "Şifre sıfırlama işlemi için sisteme kayıtlı e-posta adresinize gereken bilgileri gönderdik."
-            })
-        })
-        .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Şifre resetleme sırasında bir problem oluştu." }));
-};
+// const deleteUser = (req, res) => {
+//     if (!req.params?.id) {
+//         return res.status(httpStatus.BAD_REQUEST).send({
+//             message: "ID Bilgisi Eksik.",
+//         });
+//     }
 
-const update = (req, res) => {
-    modify(req.user._doc._id, req.body)
-        .then((updatedUser) => {
-            res.status(httpStatus.OK).send(updatedUser);
-        })
-        .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: "Güncelleme işlemi sırasında bir problem oluştu." }))
-};
+//     if (req.user && req.user._doc._id === req.params.id) {
+//         remove(req.params.id)
+//             .then((deletedItem) => {
+//                 if (!deletedItem) {
+//                     return res.status(httpStatus.NOT_FOUND).send({
+//                         message: "Böyle bir kayıt bulunmamaktadır.",
+//                     });
+//                 }
+//                 res.status(httpStatus.OK).send({
+//                     message: "Kayıt silinmiştir.",
+//                 });
+//             })
+//             .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Silme işlemi sırasında hata ile karşılaşıldı." }));
+//     } else {
+//         res.status(httpStatus.UNAUTHORIZED).send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
+//     }
+// };
 
 const deleteUser = (req, res) => {
-    if (!req.params?.id) {
+    const id = req.params?.id;
+    const userId = req.user?._doc?._id;
+
+    if (!id) {
         return res.status(httpStatus.BAD_REQUEST).send({
             message: "ID Bilgisi Eksik.",
         });
     }
 
-    if (req.user && req.user._doc._id === req.params.id) {
-        remove(req.params.id)
+    if (userId === id) {
+        remove(id)
             .then((deletedItem) => {
                 if (!deletedItem) {
                     return res.status(httpStatus.NOT_FOUND).send({
@@ -107,62 +206,83 @@ const deleteUser = (req, res) => {
                     message: "Kayıt silinmiştir.",
                 });
             })
-            .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Silme işlemi sırasında hata ile karşılaşıldı." }));
+            .catch((e) =>
+                res
+                    .status(httpStatus.INTERNAL_SERVER_ERROR)
+                    .send({ error: "Silme işlemi sırasında hata ile karşılaşıldı." })
+            );
     } else {
-        res.status(httpStatus.UNAUTHORIZED).send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
+        res
+            .status(httpStatus.UNAUTHORIZED)
+            .send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
     }
 };
 
+// const changePassword = async (req, res) => {
 
-//  const changePassword = (req, res) => {
-//      if (req.user && req.user._doc._id === req.params.id) {
-//          if (req.body.password) {
-//              req.body.password = passwordToHash(req.body.password);
-//          }
-//          modify(req.params.id, req.body)
-//              .then((result) => {
-//                  res.status(httpStatus.OK).send(result);
-//              })
-//              .catch((err) => {
-//                  res.status(httpStatus.NOT_FOUND).send(err);
-//              });
-//      } else {
-//          res.status(httpStatus.UNAUTHORIZED).send({error : "Bu eylemi gerçekleştirmek için yetkiniz yok."});
-//      }
-//  };
+//     const userId = req.params.id;
+//     const oldPassword = req.body.oldpassword;
+//     const newPassword = req.body.newpassword;
+//     const oldPasswordHash = passwordToHash(oldPassword);
+
+//     if (req.user && req.user._doc._id === req.params.id) {
+//         try {
+//             const user = await Users.findById(userId);
+//             if (!user) {
+//                 return res.status(httpStatus.NOT_FOUND).send({ error: "Kullanıcı bulunamadı." });
+//             }
+
+//             if (oldPasswordHash !== user.password) {
+//                 return res.status(httpStatus.BAD_REQUEST).send({ error: "Eski şifreniz yanlış." });
+//             }
+
+//             // Eski şifre doğru, yeni şifre hashleniyor ve kaydediliyor
+//             const newPasswordHash = passwordToHash(newPassword);
+//             user.password = newPasswordHash;
+//             await user.save();
+
+//             return res.status(httpStatus.OK).send({ error: "Şifreniz başarıyla değiştirildi." });
+//         } catch (error) {
+//             console.error(error);
+//             return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Şifreniz değiştirilirken bir hata ile karşılaşıldı." });
+//         }
+//     } else {
+//         res.status(httpStatus.UNAUTHORIZED).send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
+//     }
+// };
 
 const changePassword = async (req, res) => {
-
     const userId = req.params.id;
     const oldPassword = req.body.oldpassword;
     const newPassword = req.body.newpassword;
     const oldPasswordHash = passwordToHash(oldPassword);
 
-    if (req.user && req.user._doc._id === req.params.id) {
-        try {
-            const user = await Users.findById(userId);
-            if (!user) {
-                return res.status(httpStatus.NOT_FOUND).send({ error: "Kullanıcı bulunamadı." });
-            }
+    if (!req.user || req.user._doc._id !== userId) {
+        return res.status(httpStatus.UNAUTHORIZED).send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
+    }
 
-            if (oldPasswordHash !== user.password) {
-                return res.status(httpStatus.BAD_REQUEST).send({ error: "Eski şifreniz yanlış." });
-            }
-
-            // Eski şifre doğru, yeni şifre hashleniyor ve kaydediliyor
-            const newPasswordHash = passwordToHash(newPassword);
-            user.password = newPasswordHash;
-            await user.save();
-
-            return res.status(httpStatus.OK).send({ error: "Şifreniz başarıyla değiştirildi." });
-        } catch (error) {
-            console.error(error);
-            return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Şifreniz değiştirilirken bir hata ile karşılaşıldı." });
+    try {
+        const user = await Users.findById(userId);
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).send({ error: "Kullanıcı bulunamadı." });
         }
-    } else {
-        res.status(httpStatus.UNAUTHORIZED).send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
+
+        if (oldPasswordHash !== user.password) {
+            return res.status(httpStatus.BAD_REQUEST).send({ error: "Eski şifreniz yanlış." });
+        }
+
+        // Eski şifre doğru, yeni şifre hashleniyor ve kaydediliyor
+        const newPasswordHash = passwordToHash(newPassword);
+        user.password = newPasswordHash;
+        await user.save();
+
+        return res.status(httpStatus.OK).send({ message: "Şifreniz başarıyla değiştirildi." });
+    } catch (error) {
+        console.error(error);
+        return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Şifreniz değiştirilirken bir hata ile karşılaşıldı." });
     }
 };
+
 
 const updateProfileImage = (req, res) => {
     //Resim Kontrol
