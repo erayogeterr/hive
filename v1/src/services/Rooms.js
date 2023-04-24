@@ -17,6 +17,7 @@ const remove = (id) => {
     return Room.findByIdAndDelete(id);
 }
 
+
 module.exports = {
     insert,
     list,

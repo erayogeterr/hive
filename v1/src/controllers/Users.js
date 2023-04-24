@@ -4,7 +4,8 @@ const eventEmitter = require("../scripts/events/eventEmitter");
 const path = require("path");
 const Users = require("../models/Users");
 const { passwordToHash, generateAccessToken, generateRefreshToken } = require("../scripts/utils/helper");
-const { insert, list, loginUser, modify, remove, modifyWhere, } = require("../services/Users");
+const { insert, list, loginUser, modify, remove, modifyWhere, deleteRoomsByUserId} = require("../services/Users");
+const Rooms = require("../models/Rooms");
 
 const create = async (req, res) => {
     try {
@@ -184,39 +185,77 @@ const update = async (req, res) => {
 //     }
 // };
 
-const deleteUser = (req, res) => {
+//-------
+// const deleteUser = (req, res) => {
+//     const id = req.params?.id;
+//     const userId = req.user?._doc?._id;
+
+//     if (!id) {
+//         return res.status(httpStatus.BAD_REQUEST).send({
+//             message: "ID Bilgisi Eksik.",
+//         });
+//     }
+
+//     if (userId === id) {
+//         remove(id)
+//             .then((deletedItem) => {
+//                 if (!deletedItem) {
+//                     return res.status(httpStatus.NOT_FOUND).send({
+//                         message: "Böyle bir kayıt bulunmamaktadır.",
+//                     });
+//                 }
+//                 res.status(httpStatus.OK).send({
+//                     message: "Kayıt silinmiştir.",
+//                 });
+//             })
+//             .catch((e) =>
+//                 res
+//                     .status(httpStatus.INTERNAL_SERVER_ERROR)
+//                     .send({ error: "Silme işlemi sırasında hata ile karşılaşıldı." })
+//             );
+//     } else {
+//         res
+//             .status(httpStatus.UNAUTHORIZED)
+//             .send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
+//     }
+// };
+
+const deleteUser = async (req, res) => {
     const id = req.params?.id;
     const userId = req.user?._doc?._id;
-
+  
     if (!id) {
-        return res.status(httpStatus.BAD_REQUEST).send({
-            message: "ID Bilgisi Eksik.",
-        });
+      return res.status(httpStatus.BAD_REQUEST).send({
+        message: "ID Bilgisi Eksik.",
+      });
     }
-
+  
     if (userId === id) {
-        remove(id)
-            .then((deletedItem) => {
-                if (!deletedItem) {
-                    return res.status(httpStatus.NOT_FOUND).send({
-                        message: "Böyle bir kayıt bulunmamaktadır.",
-                    });
-                }
-                res.status(httpStatus.OK).send({
-                    message: "Kayıt silinmiştir.",
-                });
-            })
-            .catch((e) =>
-                res
-                    .status(httpStatus.INTERNAL_SERVER_ERROR)
-                    .send({ error: "Silme işlemi sırasında hata ile karşılaşıldı." })
-            );
+      try {
+        const deletedUser = await Users.findByIdAndDelete(id);
+        if (!deletedUser) {
+          return res.status(httpStatus.NOT_FOUND).send({
+            message: "Böyle bir kullanıcı bulunmamaktadır.",
+          });
+        }
+  
+        const deletedRooms = await Rooms.deleteMany({ createdBy: id });
+        console.log(`${deletedRooms.deletedCount} odaları silindi.`);
+  
+        res.status(httpStatus.OK).send({
+          message: "Kullanıcı ve kullanıcının odaları başarıyla silinmiştir.",
+        });
+      } catch (err) {
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+          error: "Silme işlemi sırasında bir hata oluştu.",
+        });
+      }
     } else {
-        res
-            .status(httpStatus.UNAUTHORIZED)
-            .send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
+      res.status(httpStatus.UNAUTHORIZED).send({
+        error: "Bu eylemi gerçekleştirmek için yetkiniz yok.",
+      });
     }
-};
+  };
 
 // const changePassword = async (req, res) => {
 
