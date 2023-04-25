@@ -4,7 +4,7 @@ const eventEmitter = require("../scripts/events/eventEmitter");
 const path = require("path");
 const Users = require("../models/Users");
 const { passwordToHash, generateAccessToken, generateRefreshToken } = require("../scripts/utils/helper");
-const { insert, list, loginUser, modify, remove, modifyWhere, deleteRoomsByUserId} = require("../services/Users");
+const { insert, list, loginUser, modify, remove, modifyWhere, deleteRoomsByUserId } = require("../services/Users");
 const Rooms = require("../models/Rooms");
 
 const create = async (req, res) => {
@@ -27,34 +27,18 @@ const create = async (req, res) => {
     }
 };
 
-
-// const index = (req, res) => {
-//     list()
-//         .then((response) => {
-//             res.status(httpStatus.OK).send(response);
-//         })
-//         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
-// };
-
 const index = async (req, res) => {
     try {
-        const response = await list();
-        return res.status(httpStatus.OK).send(response);
+        const users = await Users.find().populate({
+            path: 'rooms',
+            select: 'eventName eventDescription lessonName code'
+        }).exec();
+
+        return res.status(httpStatus.OK).send(users);
     } catch (err) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(err);
     }
 };
-
-// const getOneUser = (req, res) => {
-//     const user = req.user._doc;
-//     const accessToken = req.headers.authorization.split(' ')[1];
-//     const refreshToken = req.user.refreshToken;
-//     res.send({
-//         user,
-//         accessToken,
-//         refreshToken
-//     });
-// }
 
 const getOneUser = (req, res) => {
     const { _doc: user, refreshToken } = req.user; //req.user objesinden _doc özelliği alarak user değişkenine atadık. ve req.userdan refresh tokenıda aldık.
@@ -64,41 +48,41 @@ const getOneUser = (req, res) => {
     res.send(responseData);
 };
 
-// const login = (req, res) => {
-//     req.body.password = passwordToHash(req.body.password);
-//     loginUser(req.body)
-//         .then((user) => {
-//             if (!user) return res.status(httpStatus.NOT_FOUND).send({ message: "Girilen kullanıcı adı ya da şifre hatalı. Lütfen girdiğiniz bilgileri kontrol ederek tekrar deneyiniz." })
-//             user = {
-//                 ...user.toObject(),
-//                 tokens: {
-//                     access_token: generateAccessToken(user),
-//                     refresh_token: generateRefreshToken(user),
-//                 },
-//             };
-//             res.status(httpStatus.OK).send(user);
-//         })
-//         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
-// };
-
-const login = async (req, res) => {
-    try {
-        const hashedPassword = passwordToHash(req.body.password);
-        const user = await loginUser({ ...req.body, password: hashedPassword }); // req.body'deki tüm özellikleri ... operatörü ile geçmiş oluyoruz.Email pass gibi.
-
-        if (!user) {
-            return res.status(httpStatus.NOT_FOUND).send({ message: "Girilen kullanıcı adı ya da şifre hatalı. Lütfen girdiğiniz bilgileri kontrol ederek tekrar deneyiniz." });
-        }
-
-        const accessToken = generateAccessToken(user);
-        const refreshToken = generateRefreshToken(user);
-        const userWithTokens = { ...user.toObject(), tokens: { access_token: accessToken, refresh_token: refreshToken } }; //Mongoose modelinin JSON nesnesini alarak, userWithTokens adlı bir obje oluşturuyoruz.
-
-        res.status(httpStatus.OK).send(userWithTokens);
-    } catch (err) {
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).send(err);
-    }
+const login = (req, res) => {
+    req.body.password = passwordToHash(req.body.password);
+    loginUser(req.body)
+        .then((user) => {
+            if (!user) return res.status(httpStatus.NOT_FOUND).send({ message: "Girilen kullanıcı adı ya da şifre hatalı. Lütfen girdiğiniz bilgileri kontrol ederek tekrar deneyiniz." })
+            user = {
+                ...user.toObject(),
+                tokens: {
+                    access_token: generateAccessToken(user),
+                    refresh_token: generateRefreshToken(user),
+                },
+            };
+            res.status(httpStatus.OK).send(user);
+        })
+        .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
 };
+
+// const login = async (req, res) => {
+//     try {
+//         const hashedPassword = passwordToHash(req.body.password);
+//         const user = await loginUser({ ...req.body, password: hashedPassword }); // req.body'deki tüm özellikleri ... operatörü ile geçmiş oluyoruz.Email pass gibi.
+
+//         if (!user) {
+//             return res.status(httpStatus.NOT_FOUND).send({ message: "Girilen kullanıcı adı ya da şifre hatalı. Lütfen girdiğiniz bilgileri kontrol ederek tekrar deneyiniz." });
+//         }
+
+//         const accessToken = generateAccessToken(user);
+//         const refreshToken = generateRefreshToken(user);
+//         const userWithTokens = { ...user.toObject(), tokens: { access_token: accessToken, refresh_token: refreshToken } }; //Mongoose modelinin JSON nesnesini alarak, userWithTokens adlı bir obje oluşturuyoruz.
+
+//         res.status(httpStatus.OK).send(userWithTokens);
+//     } catch (err) {
+//         res.status(httpStatus.INTERNAL_SERVER_ERROR).send(err);
+//     }
+// };
 
 // const resetPassword = (req, res) => {
 //     const new_password = uuid.v4()?.split("-")[0] || `usr-${new Date().getTime()}`;
@@ -142,14 +126,6 @@ const resetPassword = async (req, res) => {
     }
 };
 
-// const update = (req, res) => {
-//     modify(req.user._doc._id, req.body)
-//         .then((updatedUser) => {
-//             res.status(httpStatus.OK).send(updatedUser);
-//         })
-//         .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: "Güncelleme işlemi sırasında bir problem oluştu." }))
-// };
-
 const update = async (req, res) => {
     try {
         const userId = req.user._doc._id;
@@ -160,135 +136,42 @@ const update = async (req, res) => {
     }
 };
 
-// const deleteUser = (req, res) => {
-//     if (!req.params?.id) {
-//         return res.status(httpStatus.BAD_REQUEST).send({
-//             message: "ID Bilgisi Eksik.",
-//         });
-//     }
-
-//     if (req.user && req.user._doc._id === req.params.id) {
-//         remove(req.params.id)
-//             .then((deletedItem) => {
-//                 if (!deletedItem) {
-//                     return res.status(httpStatus.NOT_FOUND).send({
-//                         message: "Böyle bir kayıt bulunmamaktadır.",
-//                     });
-//                 }
-//                 res.status(httpStatus.OK).send({
-//                     message: "Kayıt silinmiştir.",
-//                 });
-//             })
-//             .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Silme işlemi sırasında hata ile karşılaşıldı." }));
-//     } else {
-//         res.status(httpStatus.UNAUTHORIZED).send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
-//     }
-// };
-
-//-------
-// const deleteUser = (req, res) => {
-//     const id = req.params?.id;
-//     const userId = req.user?._doc?._id;
-
-//     if (!id) {
-//         return res.status(httpStatus.BAD_REQUEST).send({
-//             message: "ID Bilgisi Eksik.",
-//         });
-//     }
-
-//     if (userId === id) {
-//         remove(id)
-//             .then((deletedItem) => {
-//                 if (!deletedItem) {
-//                     return res.status(httpStatus.NOT_FOUND).send({
-//                         message: "Böyle bir kayıt bulunmamaktadır.",
-//                     });
-//                 }
-//                 res.status(httpStatus.OK).send({
-//                     message: "Kayıt silinmiştir.",
-//                 });
-//             })
-//             .catch((e) =>
-//                 res
-//                     .status(httpStatus.INTERNAL_SERVER_ERROR)
-//                     .send({ error: "Silme işlemi sırasında hata ile karşılaşıldı." })
-//             );
-//     } else {
-//         res
-//             .status(httpStatus.UNAUTHORIZED)
-//             .send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
-//     }
-// };
-
 const deleteUser = async (req, res) => {
     const id = req.params?.id;
     const userId = req.user?._doc?._id;
-  
+
     if (!id) {
-      return res.status(httpStatus.BAD_REQUEST).send({
-        message: "ID Bilgisi Eksik.",
-      });
+        return res.status(httpStatus.BAD_REQUEST).send({
+            message: "ID Bilgisi Eksik.",
+        });
     }
-  
+
     if (userId === id) {
-      try {
-        const deletedUser = await Users.findByIdAndDelete(id);
-        if (!deletedUser) {
-          return res.status(httpStatus.NOT_FOUND).send({
-            message: "Böyle bir kullanıcı bulunmamaktadır.",
-          });
+        try {
+            const deletedUser = await Users.findByIdAndDelete(id);
+            if (!deletedUser) {
+                return res.status(httpStatus.NOT_FOUND).send({
+                    message: "Böyle bir kullanıcı bulunmamaktadır.",
+                });
+            }
+
+            const deletedRooms = await Rooms.deleteMany({ createdBy: id });
+            console.log(`${deletedRooms.deletedCount} odaları silindi.`);
+
+            res.status(httpStatus.OK).send({
+                message: "Kullanıcı ve kullanıcının odaları başarıyla silinmiştir.",
+            });
+        } catch (err) {
+            res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+                error: "Silme işlemi sırasında bir hata oluştu.",
+            });
         }
-  
-        const deletedRooms = await Rooms.deleteMany({ createdBy: id });
-        console.log(`${deletedRooms.deletedCount} odaları silindi.`);
-  
-        res.status(httpStatus.OK).send({
-          message: "Kullanıcı ve kullanıcının odaları başarıyla silinmiştir.",
-        });
-      } catch (err) {
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-          error: "Silme işlemi sırasında bir hata oluştu.",
-        });
-      }
     } else {
-      res.status(httpStatus.UNAUTHORIZED).send({
-        error: "Bu eylemi gerçekleştirmek için yetkiniz yok.",
-      });
+        res.status(httpStatus.UNAUTHORIZED).send({
+            error: "Bu eylemi gerçekleştirmek için yetkiniz yok.",
+        });
     }
-  };
-
-// const changePassword = async (req, res) => {
-
-//     const userId = req.params.id;
-//     const oldPassword = req.body.oldpassword;
-//     const newPassword = req.body.newpassword;
-//     const oldPasswordHash = passwordToHash(oldPassword);
-
-//     if (req.user && req.user._doc._id === req.params.id) {
-//         try {
-//             const user = await Users.findById(userId);
-//             if (!user) {
-//                 return res.status(httpStatus.NOT_FOUND).send({ error: "Kullanıcı bulunamadı." });
-//             }
-
-//             if (oldPasswordHash !== user.password) {
-//                 return res.status(httpStatus.BAD_REQUEST).send({ error: "Eski şifreniz yanlış." });
-//             }
-
-//             // Eski şifre doğru, yeni şifre hashleniyor ve kaydediliyor
-//             const newPasswordHash = passwordToHash(newPassword);
-//             user.password = newPasswordHash;
-//             await user.save();
-
-//             return res.status(httpStatus.OK).send({ error: "Şifreniz başarıyla değiştirildi." });
-//         } catch (error) {
-//             console.error(error);
-//             return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Şifreniz değiştirilirken bir hata ile karşılaşıldı." });
-//         }
-//     } else {
-//         res.status(httpStatus.UNAUTHORIZED).send({ error: "Bu eylemi gerçekleştirmek için yetkiniz yok." });
-//     }
-// };
+};
 
 const changePassword = async (req, res) => {
     const userId = req.params.id;
@@ -321,7 +204,6 @@ const changePassword = async (req, res) => {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Şifreniz değiştirilirken bir hata ile karşılaşıldı." });
     }
 };
-
 
 const updateProfileImage = (req, res) => {
     //Resim Kontrol
