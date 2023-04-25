@@ -17,7 +17,7 @@ const create = (req, res) => {
         eventName,
         eventDescription,
         lessonName,
-        createdById: req.user._doc._id,
+        createdBy: req.user._doc._id,
     };
 
     insert(newRoom)
@@ -177,9 +177,9 @@ const JoinRoom = async (req, res) => {
 };
 
 const getUserRooms = (req, res) => {
-    const { id } = req.params;
+    const { _id } = req.user._doc;
 
-    Rooms.find({ createdBy: id })
+    Rooms.find({ createdBy: _id })
         .populate({
             path: 'createdBy',
             model: User,
