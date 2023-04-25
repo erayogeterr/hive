@@ -1,33 +1,8 @@
 const httpStatus = require("http-status");
-const { insert, list, listIdRoom, remove } = require("../services/Rooms");
-const { passwordToHash } = require("../scripts/utils/helper");
 const Rooms = require("../models/Rooms");
 const User = require("../models/Users");
 const Participant = require('../models/Participants');
-
-
-// const create = (req, res) => {
-//     const { eventName, eventDescription, lessonName } = req.body;
-
-//     if (!eventName || !eventDescription || !lessonName) {
-//         return res.status(httpStatus.BAD_REQUEST).send({ error: "Aktivite adı, aktivete açıklaması ve Ders adı girilmesi zorunludur." });
-//     }
-
-//     const room = {
-//         eventName,
-//         eventDescription,
-//         lessonName,
-//         createdBy: req.user._doc._id 
-//     };
-
-//     insert(room)
-//         .then((response) => {
-//             res.status(httpStatus.CREATED).send(response);
-//         })
-//         .catch((e) => {
-//             res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e);
-//         });
-// }
+const { insert, list, listIdRoom, remove, } = require("../services/Rooms");
 
 const create = (req, res) => {
     const { eventName, eventDescription, lessonName } = req.body;
@@ -42,12 +17,29 @@ const create = (req, res) => {
         eventName,
         eventDescription,
         lessonName,
-        createdBy: req.user._doc._id,
+        createdById: req.user._doc._id,
     };
 
     insert(newRoom)
         .then((response) => {
-            res.status(httpStatus.CREATED).send(response);
+            User.findByIdAndUpdate(
+                req.user._doc._id,
+                { $push: { rooms: response._doc._id } },
+                { new: true, select: 'firstName lastName email createdAt updatedAt rooms' }
+            )
+                .populate({
+                    path: 'rooms',
+                    model: Rooms,
+                    select: 'eventName eventDescription lessonName code'
+                })
+                .then((user) => {
+                    res.status(httpStatus.CREATED).send(user.rooms);
+                })
+                .catch((error) => {
+                    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+                        error: "Oda oluşturma sırasında bir hata oluştu.",
+                    });
+                });
         })
         .catch((error) => {
             res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
@@ -55,51 +47,6 @@ const create = (req, res) => {
             });
         });
 };
-
-
-// const index = (req, res) => {
-//     Rooms.find({})
-//         .populate({
-//             path: 'createdBy',
-//             model: User,
-//             select: 'email firstName lastName'
-//         })
-//         .then((rooms) => {
-//             if (!rooms) {
-//                 return res.status(httpStatus.NOT_FOUND).send({ error: "Hiçbir Oda Bulunamadı." });
-//             }
-
-//             const roomsList = rooms.map((room) => {
-//                 let createdBy = null;
-//                 if (room.createdBy) { // // createdBy özelliğinin id özelliğine erişmeden önce kontrol edilir.
-//                     createdBy = {
-//                         id: room.createdBy.id,
-//                         email: room.createdBy.email,
-//                         firstName: room.createdBy.firstName,
-//                         lastName: room.createdBy.lastName,
-//                     };
-//                 }
-
-//                 return {
-//                     id: room.id,
-//                     eventName: room.eventName,
-//                     eventDescription: room.eventDescription,
-//                     lessonName: room.lessonName,
-//                     participants: room.participants,
-//                     code: room.code,
-//                     createdAt: room.createdAt,
-//                     updatedAt: room.updatedAt,
-//                     createdBy: createdBy,
-//                 };
-//             });
-
-//             res.status(httpStatus.OK).send(roomsList);
-//         })
-//         .catch((e) => {
-//             console.log(e);
-//             res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Odalar Getirilirken Hata Oluştu." });
-//         });
-// }
 
 const index = (req, res) => {
     Rooms.find({})
@@ -149,48 +96,6 @@ const index = (req, res) => {
         });
 }
 
-
-// const getByIdRoom = (req, res) => {
-//     if (req.params.id) {
-//         Rooms.findById(req.params.id)
-//             .populate({
-//                 path: 'createdBy',
-//                 model: User,
-//                 select: 'email firstName lastName'
-//             })
-//             .then((room) => {
-//                 if (!room) {
-//                     return res.status(httpStatus.NOT_FOUND).send({ error: "Aradığınız Oda Bulunamadı." });
-//                 }
-//                 if (!room.createdBy) {
-//                     return res.status(httpStatus.NOT_FOUND).send({ error: "Oda Sahibi Bulunamadı." });
-//                 }
-//                 res.status(httpStatus.OK).send({
-//                     id: room.id,
-//                     eventName: room.eventName,
-//                     eventDescription: room.eventDescription,
-//                     lessonName: room.lessonName,
-//                     participants: room.participants,
-//                     code: room.code,
-//                     createdAt: room.createdAt,
-//                     updatedAt: room.updatedAt,
-//                     createdBy: {
-//                         id: room.createdBy.id,
-//                         email: room.createdBy.email,
-//                         firstName: room.createdBy.firstName,
-//                         lastName: room.createdBy.lastName,
-//                     }
-//                 });
-//             })
-//             .catch((e) => {
-//                 console.log(e);
-//                 res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Oda Getirilirken Hata Oluştu." });
-//             });
-//     } else {
-//         res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Oda Getirilirken Hata Oluştu." });
-//     }
-// }
-
 const getByIdRoom = (req, res) => {
     if (!req.params.id) {
         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Oda Getirilirken Hata Oluştu." });
@@ -237,19 +142,6 @@ const getByIdRoom = (req, res) => {
         });
 };
 
-// const deleteRoom = (req, res) => {
-//     remove(req.params.id)
-//         .then((deletedItem) => {
-//             if (!deletedItem) {
-//                 return res.status(httpStatus.NOT_FOUND).send({ message: "Böyle bir oda bulunmamaktadır.", });
-//             }
-//             res.status(httpStatus.OK).send({
-//                 message: "Oda silinmiştir.",
-//             });
-//         })
-//         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Silme işlemi sırasında hata ile karşılaşıldı." }));
-// }
-
 const deleteRoom = (req, res) => {
     remove(req.params.id)
         .then((deletedItem) => {
@@ -283,7 +175,6 @@ const JoinRoom = async (req, res) => {
 
     return res.status(httpStatus.OK).send({ message: 'Katılım başarılı.', participant });
 };
-
 
 const getUserRooms = (req, res) => {
     const { id } = req.params;
