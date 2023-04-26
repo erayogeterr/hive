@@ -4,49 +4,119 @@ const User = require("../models/Users");
 const Participant = require('../models/Participants');
 const { insert, list, listIdRoom, remove, } = require("../services/Rooms");
 
-const create = (req, res) => {
+// const create = (req, res) => {
+//     const { eventName, eventDescription, lessonName } = req.body;
+
+//     if (!eventName || !eventDescription || !lessonName) {
+//         return res.status(httpStatus.BAD_REQUEST).send({
+//             error: "Aktivite adı, aktivite açıklaması ve ders adı girilmesi zorunludur.",
+//         });
+//     }
+
+//     const newRoom = {
+//         eventName,
+//         eventDescription,
+//         lessonName,
+//         createdBy: req.user._doc._id,
+//     };
+
+//     insert(newRoom)
+//         .then((response) => {
+//             User.findByIdAndUpdate(
+//                 req.user._doc._id,
+//                 { $push: { rooms: response._doc._id } },
+//                 { new: true, select: 'firstName lastName email createdAt updatedAt rooms' }
+//             )
+//                 .populate({
+//                     path: 'rooms',
+//                     model: Rooms,
+//                     select: 'eventName eventDescription lessonName code'
+//                 })
+//                 .then((user) => {
+//                     res.status(httpStatus.CREATED).send(user.rooms);
+//                 })
+//                 .catch((error) => {
+//                     res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+//                         error: "Oda oluşturma sırasında bir hata oluştu.",
+//                     });
+//                 });
+//         })
+//         .catch((error) => {
+//             res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+//                 error: "Oda oluşturma sırasında bir hata oluştu.",
+//             });
+//         });
+// };
+
+// const create = (req, res) => {
+//     const { eventName, eventDescription, lessonName } = req.body;
+
+//     if (!eventName || !eventDescription || !lessonName) {
+//         return res.status(httpStatus.BAD_REQUEST).send({
+//             error: "Aktivite adı, aktivite açıklaması ve ders adı girilmesi zorunludur.",
+//         });
+//     }
+
+//     const newRoom = {
+//         eventName,
+//         eventDescription,
+//         lessonName,
+//         createdBy: req.user._doc._id,
+//     };
+
+//     insert(newRoom)
+//         .then((response) => {
+//             User.findByIdAndUpdate(
+//                 req.user._doc._id,
+//                 { $push: { rooms: response._doc._id } },
+//                 { new: true, select: 'firstName lastName email createdAt updatedAt rooms' }
+//             )
+//                 .populate({
+//                     path: 'rooms',
+//                     model: Rooms,
+//                     select: 'eventName eventDescription lessonName code'
+//                 })
+//                 .then((user) => {
+//                     return res.status(httpStatus.CREATED).send(user.rooms);
+//                 })
+//                 .catch((error) => {
+//                     return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+//                         error: "Oda oluşturma sırasında bir hata oluştu.",
+//                     });
+//                 });
+//         })
+//         .catch((error) => {
+//             return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+//                 error: "Oda oluşturma sırasında bir hata oluştu.",
+//             });
+//         });
+// };
+
+const create = async (req, res)  => {
     const { eventName, eventDescription, lessonName } = req.body;
-
+  
+    // eventName, eventDescription ve lessonName kontrolü
     if (!eventName || !eventDescription || !lessonName) {
-        return res.status(httpStatus.BAD_REQUEST).send({
-            error: "Aktivite adı, aktivite açıklaması ve ders adı girilmesi zorunludur.",
-        });
+      return res.status(httpStatus.BAD_REQUEST).send({ message: 'Aktivite adı, aktivite açıklaması ve ders adı girilmesi zorunludur.' });
     }
-
-    const newRoom = {
-        eventName,
-        eventDescription,
-        lessonName,
-        createdBy: req.user._doc._id,
-    };
-
-    insert(newRoom)
-        .then((response) => {
-            User.findByIdAndUpdate(
-                req.user._doc._id,
-                { $push: { rooms: response._doc._id } },
-                { new: true, select: 'firstName lastName email createdAt updatedAt rooms' }
-            )
-                .populate({
-                    path: 'rooms',
-                    model: Rooms,
-                    select: 'eventName eventDescription lessonName code'
-                })
-                .then((user) => {
-                    res.status(httpStatus.CREATED).send(user.rooms);
-                })
-                .catch((error) => {
-                    res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-                        error: "Oda oluşturma sırasında bir hata oluştu.",
-                    });
-                });
-        })
-        .catch((error) => {
-            res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-                error: "Oda oluşturma sırasında bir hata oluştu.",
-            });
-        });
-};
+  
+    try {
+      const createdBy = req.user._doc._id; // Kullanıcı kimliği alıdnı.
+      const user = await User.findById(createdBy);
+      if (!user) {
+        return res.status(httpStatus.NOT_FOUND).send({ message: 'Kullanıcı bulunamadı.' });
+      }
+      const room = await Rooms.create({ eventName, eventDescription, lessonName, createdBy });
+      user.rooms.push(room._id);
+      await user.save(); // Kullanıcının odalarına yeni oda ekleme
+  
+      const populatedRoom = await Rooms.findById(room._id).populate('createdBy', 'id email firstName lastName'); // Oluşturulan odayı kullanıcının bilgileriyle birlikte alın
+      res.status(httpStatus.CREATED).send(populatedRoom);
+    } catch (err) {
+      console.error(err);
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: 'Sunucu hatası. Lütfen tekrar deneyin.' });
+    }
+}
 
 const index = (req, res) => {
     Rooms.find({})

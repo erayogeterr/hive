@@ -18,4 +18,4 @@ UserSchema.post("save", (doc) => {
     })
 })
 
-module.exports = Mongoose.model("user", UserSchema);
+module.exports = Mongoose.model("User", UserSchema);

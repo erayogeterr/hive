@@ -27,16 +27,28 @@ const create = async (req, res) => {
     }
 };
 
+// const index = async (req, res) => {
+//     try {
+//         const users = await Users.find().populate({
+//             path: 'rooms',
+//             select: 'eventName eventDescription lessonName code'
+//         }).exec();
+
+//         return res.status(httpStatus.OK).send(users);
+//     } catch (err) {
+//         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error : "Odalar getirilemedi."});
+//     }
+// };
+
 const index = async (req, res) => {
     try {
-        const users = await Users.find().populate({
-            path: 'rooms',
-            select: 'eventName eventDescription lessonName code'
-        }).exec();
-
-        return res.status(httpStatus.OK).send(users);
-    } catch (err) {
-        return res.status(httpStatus.INTERNAL_SERVER_ERROR).send(err);
+        const users = await Users.find().populate('rooms', 'eventName eventDescription lessonName code');
+        res.status(httpStatus.OK).send(users);
+    } catch (error) {
+        console.log(error); // hata kaydı konsola yazdırılıyor
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+            error: "Kullanıcıları listeleme sırasında bir hata oluştu.",
+        });
     }
 };
 
