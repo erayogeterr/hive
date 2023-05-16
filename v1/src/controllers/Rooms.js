@@ -2,6 +2,7 @@ const httpStatus = require("http-status");
 const Rooms = require("../models/Rooms");
 const User = require("../models/Users");
 const Participant = require('../models/Participants');
+const requestIp = require('request-ip')
 const { insert, list, listIdRoom, remove, } = require("../services/Rooms");
 
 // const create = (req, res) => {
@@ -259,8 +260,9 @@ const JoinRoom = async (req, res) => {
    // const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
    //const clientIp = req.headers['x-real-ip'] || req.socket.remoteAddress;
    //const clientIp = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket.remoteAddress;
-   const clientIp = req.ip;
+   const clientIp = requestIp.getClientIp(req);
    console.log(clientIp);
+   res.send(`Your IP Address is ${clientIp}.`);
     const existingParticipant = await Participant.findOne({ room: room.id, ip: clientIp });
 
     if (existingParticipant) {
