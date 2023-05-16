@@ -258,7 +258,8 @@ const JoinRoom = async (req, res) => {
 
    // const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
    //const clientIp = req.headers['x-real-ip'] || req.socket.remoteAddress;
-   const clientIp = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket.remoteAddress;
+   //const clientIp = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket.remoteAddress;
+   const clientIp = req.ip;
    console.log(clientIp);
     const existingParticipant = await Participant.findOne({ room: room.id, ip: clientIp });
 
