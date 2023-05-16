@@ -260,6 +260,7 @@ const JoinRoom = async (req, res) => {
     const response = await fetch ("https://api.ipify.org/");
     const clientIp = await response.text();
     const existingParticipant = await Participant.findOne({ room: room.id, ip: clientIp });
+    console.log("sea")
 
     if (existingParticipant) {
         return res.status(httpStatus.BAD_REQUEST).send({ message: 'Aynı etkinliğe tekrardan katılamazsınız.', participant: existingParticipant });
