@@ -257,12 +257,8 @@ const JoinRoom = async (req, res) => {
         return res.status(httpStatus.NOT_FOUND).send({ message: 'Geçersiz kod' });
     }
 
-   // const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-   //const clientIp = req.headers['x-real-ip'] || req.socket.remoteAddress;
-   //const clientIp = req.headers['x-forwarded-for'] || req.headers['x-real-ip'] || req.socket.remoteAddress;
-   const clientIp = requestIp.getClientIp(req);
-   console.log(clientIp);
-   res.send(`Your IP Address is ${clientIp}.`);
+    const response = await fetch ("https://api.ipify.org/");
+    const clientIp = await response.text();
     const existingParticipant = await Participant.findOne({ room: room.id, ip: clientIp });
 
     if (existingParticipant) {
