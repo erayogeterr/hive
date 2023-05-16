@@ -256,7 +256,8 @@ const JoinRoom = async (req, res) => {
         return res.status(httpStatus.NOT_FOUND).send({ message: 'Geçersiz kod' });
     }
 
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+   // const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    const clientIp = req.socket.remoteAddress;
     const existingParticipant = await Participant.findOne({ room: room.id, ip: clientIp });
 
     if (existingParticipant) {
@@ -271,7 +272,6 @@ const JoinRoom = async (req, res) => {
     room.participants = participants;
 
     await room.save();
-
     return res.status(httpStatus.OK).send({ message: 'Katılım başarılı.', participant });
 };
 
