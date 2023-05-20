@@ -268,9 +268,11 @@ const JoinRoom = async (req, res) => {
     const participant = new Participant({ room: room.id, ip: clientIp });
     await participant.save();
 
-    let participants = room.participants || [];
-    participants.push(participant.name);
-    room.participants = participants;
+    // let participants = room.participants || [];
+    // participants.push(participant.name);
+    // room.participants = participants;
+
+    room.participants.push(participant.name);
 
     await room.save();
     return res.status(httpStatus.OK).send({ message: 'Katılım başarılı.', participant });
