@@ -2,7 +2,6 @@ const httpStatus = require("http-status");
 const Rooms = require("../models/Rooms");
 const User = require("../models/Users");
 const Participant = require('../models/Participants');
-const requestIp = require('request-ip')
 const { insert, list, listIdRoom, remove, } = require("../services/Rooms");
 
 // const create = (req, res) => {
@@ -93,29 +92,29 @@ const { insert, list, listIdRoom, remove, } = require("../services/Rooms");
 //         });
 // };
 
-const create = async (req, res)  => {
+const create = async (req, res) => {
     const { eventName, eventDescription, lessonName } = req.body;
-  
+
     // eventName, eventDescription ve lessonName kontrolü
     if (!eventName || !eventDescription || !lessonName) {
-      return res.status(httpStatus.BAD_REQUEST).send({ message: 'Aktivite adı, aktivite açıklaması ve ders adı girilmesi zorunludur.' });
+        return res.status(httpStatus.BAD_REQUEST).send({ message: 'Aktivite adı, aktivite açıklaması ve ders adı girilmesi zorunludur.' });
     }
-  
+
     try {
-      const createdBy = req.user._doc._id; // Kullanıcı kimliği alıdnı.
-      const user = await User.findById(createdBy);
-      if (!user) {
-        return res.status(httpStatus.NOT_FOUND).send({ message: 'Kullanıcı bulunamadı.' });
-      }
-      const room = await Rooms.create({ eventName, eventDescription, lessonName, createdBy });
-      user.rooms.push(room._id);
-      await user.save(); // Kullanıcının odalarına yeni oda ekleme
-  
-      const populatedRoom = await Rooms.findById(room._id).populate('createdBy', 'id email firstName lastName'); // Oluşturulan odayı kullanıcının bilgileriyle birlikte alın
-      res.status(httpStatus.CREATED).send(populatedRoom);
+        const createdBy = req.user._doc._id; // Kullanıcı kimliği alıdnı.
+        const user = await User.findById(createdBy);
+        if (!user) {
+            return res.status(httpStatus.NOT_FOUND).send({ message: 'Kullanıcı bulunamadı.' });
+        }
+        const room = await Rooms.create({ eventName, eventDescription, lessonName, createdBy });
+        user.rooms.push(room._id);
+        await user.save(); // Kullanıcının odalarına yeni oda ekleme
+
+        const populatedRoom = await Rooms.findById(room._id).populate('createdBy', 'id email firstName lastName'); // Oluşturulan odayı kullanıcının bilgileriyle birlikte alın
+        res.status(httpStatus.CREATED).send(populatedRoom);
     } catch (err) {
-      console.error(err);
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: 'Sunucu hatası. Lütfen tekrar deneyin.' });
+        console.error(err);
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: 'Sunucu hatası. Lütfen tekrar deneyin.' });
     }
 }
 
@@ -258,7 +257,8 @@ const JoinRoom = async (req, res) => {
     }
 
     const response = await fetch ("https://api.ipify.org/");
-    const clientIp = await response.text();
+    //const clientIp = await response.text();
+    const clientIp = req.ip;
     const existingParticipant = await Participant.findOne({ room: room.id, ip: clientIp });
 
     if (existingParticipant) {
@@ -275,6 +275,7 @@ const JoinRoom = async (req, res) => {
     await room.save();
     return res.status(httpStatus.OK).send({ message: 'Katılım başarılı.', participant });
 };
+
 
 const getUserRooms = (req, res) => {
     const { _id } = req.user._doc;
