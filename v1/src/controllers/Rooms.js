@@ -258,7 +258,7 @@ const JoinRoom = async (req, res) => {
 
     const response = await fetch ("https://api.ipify.org/");
     //const clientIp = await response.text();
-    const clientIp = req.ip;
+    const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress || req.socket.remoteAddress;
     const existingParticipant = await Participant.findOne({ room: room.id, ip: clientIp });
 
     if (existingParticipant) {
