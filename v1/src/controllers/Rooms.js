@@ -260,6 +260,7 @@ const JoinRoom = async (req, res) => {
     //const clientIp = await response.text();
     const clientIp = req.headers['x-real-ip'] || req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     console.log(clientIp);
+    console.log(req.headers['x-real-ip']);
     const existingParticipant = await Participant.findOne({ room: room.id, ip: clientIp });
 
     if (existingParticipant) {
@@ -269,11 +270,9 @@ const JoinRoom = async (req, res) => {
     const participant = new Participant({ room: room.id, ip: clientIp });
     await participant.save();
 
-    // let participants = room.participants || [];
-    // participants.push(participant.name);
-    // room.participants = participants;
-
-    room.participants.push(participant.name);
+     let participants = room.participants || [];
+     participants.push(participant.name);
+     room.participants = participants;
 
     await room.save();
     return res.status(httpStatus.OK).send({ message: 'Katılım başarılı.', participant });
