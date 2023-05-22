@@ -1,12 +1,12 @@
 const Question = require('../models/Questions');
 
-
-module.exports = (io) => {
+const questionSocket = (io) => {
   io.on('connection', (socket) => {
     console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
 
     // Yeni bir soru gönderildiğinde
     socket.on('question', async (data) => {
+      console.log(data);
       try {
         // Question modelinden yeni bir soru oluştur
         const question = new Question({
@@ -30,3 +30,7 @@ module.exports = (io) => {
     });
   });
 };
+
+module.exports = {
+  questionSocket,
+}
