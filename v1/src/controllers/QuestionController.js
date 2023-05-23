@@ -33,11 +33,17 @@ const questionSocket = (io) => {
       io.to(data.roomId).emit('newPartipicant', {name : socket.id});
     })
 
+    socket.on('disconnectParticipant', async (data) => {
+      socket.leave(data.roomId);
+      io.to(data.roomId).emit('updatedParticipant', socket);
+    })
+
     socket.on('disconnect', (data) => {
       console.log('Bir bağlantı sonlandırıldı:', socket.id);
      // socket.emit('disconnectParticipant', socket);
       io.to(data.roomId).emit('disconnectParticipant', socket);
     });
+
   });
 };
 
