@@ -20,13 +20,18 @@ const questionSocket = (io) => {
 
         // Yeni soruyu tüm bağlantılara yayınla
        // io.emit('newQuestion', question);
-        socket.join(data.roomId);
-        io.to(data.roomId).emit('newQuestion', question);
+       io.to(data.roomId).emit('newQuestion', question);
         console.log(data.roomId);
       } catch (error) {
         console.error('Soru kaydedilirken bir hata oluştu:', error);
       }
     });
+
+
+    socket.on('partipicant',async (data) => {
+      socket.join(data.roomId);
+      io.to(data.roomId).emit('newPartipicant', {name : "anonymous" + socket.id});
+    })
 
     socket.on('disconnect', () => {
       console.log('Bir bağlantı sonlandırıldı:', socket.id);
