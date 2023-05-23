@@ -37,8 +37,6 @@ const questionSocket = (io) => {
       console.log('Bir bağlantı sonlandırıldı:', socket.id);
       socket.emit('disconnectParticipant', socket);
     });
-
-    socket.on('disconnectParticipantEmit' , socket.id);
   });
 };
 
