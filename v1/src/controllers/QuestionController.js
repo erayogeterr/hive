@@ -19,8 +19,10 @@ const questionSocket = (io) => {
         await question.save();
 
         // Yeni soruyu tüm bağlantılara yayınla
-        //io.emit('newQuestion', question);
+       // io.emit('newQuestion', question);
+        socket.join(data.roomId);
         io.to(data.roomId).emit('newQuestion', question);
+        console.log(data.roomId);
       } catch (error) {
         console.error('Soru kaydedilirken bir hata oluştu:', error);
       }
