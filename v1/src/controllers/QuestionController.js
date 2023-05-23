@@ -33,18 +33,25 @@ const questionSocket = (io) => {
       io.to(data.roomId).emit('newPartipicant', {name : socket.id});
     })
 
-    socket.on('disconnectParticipant', async (data) => {
-      socket.leave(data.roomId);
-      io.to(data.roomId).emit('updatedParticipant', socket);
-    })
+    // socket.on('disconnectParticipant', async (data) => {
+    //   socket.leave(data.roomId);
+    //   io.to(data.roomId).emit('updatedParticipant', socket);
+    // })
 
-    socket.on('disconnect', (data) => {
+    // socket.on('disconnect', (data) => {
+    //   console.log('Bir bağlantı sonlandırıldı:', socket.id);
+    //  // socket.emit('disconnectParticipant', socket);
+    //   io.to(data.roomId).emit('disconnectParticipant', socket);
+    // });
+
+    socket.on('disconnect', () => {
       console.log('Bir bağlantı sonlandırıldı:', socket.id);
-     // socket.emit('disconnectParticipant', socket);
-      io.to(data.roomId).emit('disconnectParticipant', socket);
-    });
-
+      socket.rooms.forEach((room) => {
+        socket.leave(room);
+        io.to(room).emit('disconnectParticipant', socket.id);
+      });
   });
+});
 };
 
 const getAllQuestions = async (req,res) => {
