@@ -47,7 +47,7 @@ const questionSocket = (io) => {
     socket.on('disconnect', () => {
       console.log('Bir bağlantı sonlandırıldı:', socket.id);
       socket.rooms.forEach((room) => {
-        socket.leave(room);
+        socket.leave(socket.roomId);
         io.to(room).emit('disconnectParticipant', socket.id);
       });
   });
