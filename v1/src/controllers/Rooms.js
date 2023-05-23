@@ -4,93 +4,6 @@ const User = require("../models/Users");
 const Participant = require('../models/Participants');
 const { insert, list, listIdRoom, remove, } = require("../services/Rooms");
 
-// const create = (req, res) => {
-//     const { eventName, eventDescription, lessonName } = req.body;
-
-//     if (!eventName || !eventDescription || !lessonName) {
-//         return res.status(httpStatus.BAD_REQUEST).send({
-//             error: "Aktivite adı, aktivite açıklaması ve ders adı girilmesi zorunludur.",
-//         });
-//     }
-
-//     const newRoom = {
-//         eventName,
-//         eventDescription,
-//         lessonName,
-//         createdBy: req.user._doc._id,
-//     };
-
-//     insert(newRoom)
-//         .then((response) => {
-//             User.findByIdAndUpdate(
-//                 req.user._doc._id,
-//                 { $push: { rooms: response._doc._id } },
-//                 { new: true, select: 'firstName lastName email createdAt updatedAt rooms' }
-//             )
-//                 .populate({
-//                     path: 'rooms',
-//                     model: Rooms,
-//                     select: 'eventName eventDescription lessonName code'
-//                 })
-//                 .then((user) => {
-//                     res.status(httpStatus.CREATED).send(user.rooms);
-//                 })
-//                 .catch((error) => {
-//                     res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-//                         error: "Oda oluşturma sırasında bir hata oluştu.",
-//                     });
-//                 });
-//         })
-//         .catch((error) => {
-//             res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-//                 error: "Oda oluşturma sırasında bir hata oluştu.",
-//             });
-//         });
-// };
-
-// const create = (req, res) => {
-//     const { eventName, eventDescription, lessonName } = req.body;
-
-//     if (!eventName || !eventDescription || !lessonName) {
-//         return res.status(httpStatus.BAD_REQUEST).send({
-//             error: "Aktivite adı, aktivite açıklaması ve ders adı girilmesi zorunludur.",
-//         });
-//     }
-
-//     const newRoom = {
-//         eventName,
-//         eventDescription,
-//         lessonName,
-//         createdBy: req.user._doc._id,
-//     };
-
-//     insert(newRoom)
-//         .then((response) => {
-//             User.findByIdAndUpdate(
-//                 req.user._doc._id,
-//                 { $push: { rooms: response._doc._id } },
-//                 { new: true, select: 'firstName lastName email createdAt updatedAt rooms' }
-//             )
-//                 .populate({
-//                     path: 'rooms',
-//                     model: Rooms,
-//                     select: 'eventName eventDescription lessonName code'
-//                 })
-//                 .then((user) => {
-//                     return res.status(httpStatus.CREATED).send(user.rooms);
-//                 })
-//                 .catch((error) => {
-//                     return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-//                         error: "Oda oluşturma sırasında bir hata oluştu.",
-//                     });
-//                 });
-//         })
-//         .catch((error) => {
-//             return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-//                 error: "Oda oluşturma sırasında bir hata oluştu.",
-//             });
-//         });
-// };
 
 const create = async (req, res) => {
     const { eventName, eventDescription, lessonName } = req.body;
@@ -225,6 +138,7 @@ const deleteRoom = (req, res) => {
         });
 };
 
+
 // const JoinRoom = async (req, res) => {
 
 //     const code = req.params.code;
@@ -234,47 +148,29 @@ const deleteRoom = (req, res) => {
 //     if (!room) {
 //         return res.status(httpStatus.NOT_FOUND).send({ message: 'Geçersiz kod' });
 //     }
-//     const participant = new Participant({ room: room.id });
+
+//     const participant = new Participant({ room: room.id});
 //     await participant.save();
 
-//     let participants = room.participants || [];
-//     participants.push(participant.name);
-//     room.participants = participants;
+//      let participants = room.participants || [];
+//      participants.push(participant.name);
+//      room.participants = participants;
 
 //     await room.save();
-
 //     return res.status(httpStatus.OK).send({ message: 'Katılım başarılı.', participant });
 // };
 
-const JoinRoom = async (req, res) => {
-
-    const code = req.params.code;
-
-    const room = await Rooms.findOne({ code });
-
-    if (!room) {
-        return res.status(httpStatus.NOT_FOUND).send({ message: 'Geçersiz kod' });
-    }
-
-    // const response = await fetch ("https://api.ipify.org/");
-    // const clientIp = await response.text();
-    // const existingParticipant = await Participant.findOne({ room: room.id, ip: clientIp });
-
-    // if (existingParticipant) {
-    //     return res.status(httpStatus.BAD_REQUEST).send({ message: 'Aynı etkinliğe tekrardan katılamazsınız.', participant: existingParticipant });
-    // }
-
-    const participant = new Participant({ room: room.id});
-    await participant.save();
-
-     let participants = room.participants || [];
-     participants.push(participant.name);
-     room.participants = participants;
-
-    await room.save();
-    return res.status(httpStatus.OK).send({ message: 'Katılım başarılı.', participant });
-};
-
+const JoinRoom = (io) => 
+    io.on('connection', (socket) => {
+        console.log('Yeni bir kullanıcı bağlandı.');
+      
+        // Oda katılımı gerçekleştirme
+        socket.on('joinRoom', (roomCode) => {
+          // Odaya katılma işlemleri burada gerçekleştirilebilir
+          socket.join(roomCode);
+          console.log(`Kullanıcı odaya katıldı: ${roomCode}`);
+        });
+    });
 
 const getUserRooms = (req, res) => {
     const { _id } = req.user._doc;
