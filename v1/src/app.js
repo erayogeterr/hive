@@ -71,7 +71,7 @@ const corsOption = {
   optionsSuccessStatus: 200,
   
 }
-app.use(cors());
+app.use(cors(corsOption));
 app.use(fileUpload());
 app.use("/uploads", express.static(path.join(__dirname, "./", "uploads")));
 
