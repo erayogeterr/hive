@@ -41,13 +41,19 @@ const loaders = require("./loaders");
 const events = require("./scripts/events");
 const { UserRoutes, RoomRoutes } = require("./api-routes");
 const cors = require("cors");
+
 const path = require("path");
 
 const http = require('http');
 const socketIO = require('socket.io');
 const app = express();
 const server = http.createServer(app);
-const io = socketIO(server);
+//const io = socketIO(server);
+const io = require('socket.io')(server, {
+    cors: {
+      origin: '*',
+    }
+  });
 
 config();
 loaders();
