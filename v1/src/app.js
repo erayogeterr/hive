@@ -45,6 +45,7 @@ const cors = require("cors");
 const path = require("path");
 
 const http = require('http');
+
 const socketIO = require('socket.io');
 const app = express();
 const server = http.createServer(app);
@@ -65,7 +66,12 @@ JoinRoom(io);
 
 app.use(express.json());
 app.use(helmet());
-app.use(cors());
+const corsOption = {
+  origin: "https://hive.net.tr",
+  optionsSuccessStatus: 200,
+  
+}
+app.use(cors(corsOption));
 app.use(fileUpload());
 app.use("/uploads", express.static(path.join(__dirname, "./", "uploads")));
 
