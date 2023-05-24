@@ -39,7 +39,7 @@ const helmet = require("helmet");
 const config = require("./config");
 const loaders = require("./loaders");
 const events = require("./scripts/events");
-const { UserRoutes, RoomRoutes, QuestionRoutes } = require("./api-routes");
+const { UserRoutes, RoomRoutes, QuestionRoutes, PartipicantRoutes } = require("./api-routes");
 const cors = require("cors");
 
 const path = require("path");
@@ -60,9 +60,11 @@ const io = socketIO(server, {
 config();
 loaders();
 const { questionSocket } = require('./controllers/QuestionController');
-const { JoinRoom } = require('./controllers/Rooms');
+const { partipicantSocket } = require('./controllers/ParticipantController');
+//const { JoinRoom } = require('./controllers/Rooms');
 questionSocket(io);
-JoinRoom(io);
+partipicantSocket(io);
+//JoinRoom(io);
 
 app.use(express.json());
 app.use(helmet());
@@ -75,4 +77,5 @@ server.listen(process.env.APP_PORT || 8000, () => {
     app.use("/users", UserRoutes);
     app.use("/rooms", RoomRoutes);
     app.use("/questions", QuestionRoutes);
+    app.use("/partipicants", PartipicantRoutes);
 });
