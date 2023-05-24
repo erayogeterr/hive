@@ -21,49 +21,36 @@ const questionSocket = (io) => {
         // Yeni soruyu tüm bağlantılara yayınla
        // io.emit('newQuestion', question);
        io.to(data.roomId).emit('newQuestion', question);
-        console.log(data.roomId);
       } catch (error) {
         console.error('Soru kaydedilirken bir hata oluştu:', error);
       }
     });
 
 
-    socket.on('partipicant',async (data) => {
-      socket.join(data.roomId);
-      io.to(data.roomId).emit('newPartipicant', {name : socket.id});
-    })
+  //   socket.on('partipicant',async (data) => {
+  //     socket.join(data.roomId);
+  //     io.to(data.roomId).emit('newPartipicant', {name : socket.id});
+  //   })
 
-    // socket.on('disconnectParticipant', async (data) => {
-    //   socket.leave(data.roomId);
-    //   io.to(data.roomId).emit('updatedParticipant', socket);
-    // })
+  //   socket.on("disconnecting", () => {
+  //     console.log(socket.rooms);
+  //     socket.rooms.forEach((room) => {
+  //       socket.leave(room);
+  //       console.log(room);
+  //       io.to(room).emit('disconnectParticipant', socket.id);
+  //     });
+  //   });
 
-    // socket.on('disconnect', (data) => {
-    //   console.log('Bir bağlantı sonlandırıldı:', socket.id);
-    //  // socket.emit('disconnectParticipant', socket);
-    //   io.to(data.roomId).emit('disconnectParticipant', socket);
-    // });
-
-    socket.on("disconnecting", () => {
-      console.log(socket.rooms);
-      socket.rooms.forEach((room) => {
-        socket.leave(room);
-        console.log(room);
-        io.to(room).emit('disconnectParticipant', socket.id);
-      });
-    });
-
-    socket.on('disconnect', () => {
-      console.log('Bir bağlantı sonlandırıldı:', socket.id);
-      console.log(socket.rooms);
-  });
+  //   socket.on('disconnect', () => {
+  //     console.log('Bir bağlantı sonlandırıldı:', socket.id);
+  //     console.log(socket.rooms);
+  // });
 });
 };
 
 const getAllQuestions = async (req,res) => {
   try {
     const questions = await Question.find({});
-    //return questions;
     res.status(httpStatus.OK).send(questions);
   } catch (error) {
     console.error('Sorular alınırken bir hata oluştu:', error);
