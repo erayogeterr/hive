@@ -39,7 +39,7 @@ const httpStatus = require("http-status");
 //         });
 //     });
 // }
-
+const  participants= {};
 const partipicantSocket = (io) => {
     io.on('connection', (socket) => {
       console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
