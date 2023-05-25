@@ -40,9 +40,8 @@ const httpStatus = require("http-status");
 //     });
 // }
 
-const partipicantSocket = (io) => {
-    io.once('connection', (socket) => { // 'once' kullanarak dinleyiciyi bir kez tanımlayın
-  
+const participantSocket = (io) => {
+    io.on('connection', (socket) => {
       console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
   
       socket.on('partipicant', async (data) => {
@@ -79,11 +78,6 @@ const partipicantSocket = (io) => {
       });
   
       socket.on('disconnect', () => {
-        console.log('Bir bağlantı sonlandırıldı:', socket.id);
-        console.log(socket.rooms);
-      });
-  
-      socket.once('disconnect', () => { // 'once' kullanarak dinleyiciyi bir kez çağırın
         console.log('Bir bağlantı sonlandırıldı:', socket.id);
         console.log(socket.rooms);
       });
