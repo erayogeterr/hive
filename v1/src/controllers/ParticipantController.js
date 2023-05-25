@@ -28,7 +28,11 @@ const partipicantSocket = (io) => {
                 socket.leave(room);
                 console.log(room);
                 io.to(room).emit('disconnectParticipant', socket.id);
-                delete participants[socket.id];
+                const participant = participants[socket.id];
+                if (participant) {
+                    delete participants[socket.id];
+                    delete participants[participant.name];
+                }
 
             });
         });
@@ -36,6 +40,11 @@ const partipicantSocket = (io) => {
         socket.on('disconnect', () => {
             console.log('Bir bağlantı sonlandırıldı:', socket.id);
             console.log(socket.rooms);
+            const participant = participants[socket.id];
+            if (participant) {
+                delete participants[socket.id];
+                delete participants[participant.name];
+            }
         });
     });
 }
