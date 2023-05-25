@@ -1,89 +1,44 @@
 const Partipicant = require('../models/Participants');
 const httpStatus = require("http-status");
 
-// const partipicantSocket = (io) => {
-    
-//     io.on('connection', (socket) => {
-//         console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
-
-//         socket.on('partipicant', async (data) => {
-//             try {
-//                 const partipicant = new Partipicant({
-//                     name: data.name,
-//                     room: data.roomId,
-//                 });
-//                 await partipicant.save();
-//                 participants[socket.id] = partipicant;
-//                 socket.join(data.roomId);
-//                 // io.to(data.roomId).emit('newPartipicant', {name : socket.id,});
-//                 io.to(data.roomId).emit('newPartipicant', { name: partipicant.name, _id : socket.id });
-//             } catch (error) {
-//                 console.error('Katılımcı kaydedilirken bir hata oluştu:', error);
-//             }
-//         })
-
-//         socket.on("disconnecting", () => {
-//             console.log(socket.rooms);
-//             socket.rooms.forEach(async (room) => {
-//                 socket.leave(room);
-//                 console.log(room);
-//                 io.to(room).emit('disconnectParticipant', socket.id);
-
-//             });
-//         });
-
-//         socket.on('disconnect', () => {
-//             console.log('Bir bağlantı sonlandırıldı:', socket.id);
-//             console.log(socket.rooms);
-        
-//         });
-//     });
-// }
-const  participants= {};
 const partipicantSocket = (io) => {
+    
     io.on('connection', (socket) => {
-      console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
-  
-      socket.on('partipicant', async (data) => {
-        try {
-          const partipicant = new Partipicant({
-            name: data.name,
-            room: data.roomId,
-          });
-          await partipicant.save();
-          participants[socket.id] = partipicant;
-          socket.join(data.roomId);
-          io.to(data.roomId).emit('newPartipicant', { name: partipicant.name, _id: socket.id });
-        } catch (error) {
-          console.error('Katılımcı kaydedilirken bir hata oluştu:', error);
-        }
-      });
-  
-      socket.on("disconnecting", async () => {
-        console.log(socket.rooms);
-        socket.rooms.forEach(async (room) => {
-          socket.leave(room);
-          console.log(room);
-          io.to(room).emit('disconnectParticipant', socket.id);
-          try {
-            // Veritabanından katılımcıyı bul ve sil
-            const participant = await Partipicant.findOne({ name: socket.id });
-            if (participant) {
-              await participant.remove();
+        console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
+
+        socket.on('partipicant', async (data) => {
+            try {
+                const partipicant = new Partipicant({
+                    name: data.name,
+                    room: data.roomId,
+                });
+                await partipicant.save();
+                socket.join(data.roomId);
+                // io.to(data.roomId).emit('newPartipicant', {name : socket.id,});
+                io.to(data.roomId).emit('newPartipicant', { name: partipicant.name, _id : socket.id });
+            } catch (error) {
+                console.error('Katılımcı kaydedilirken bir hata oluştu:', error);
             }
-          } catch (error) {
-            console.error('Katılımcı silinirken bir hata oluştu:', error);
-          }
+        })
+
+        socket.on("disconnecting", () => {
+            console.log(socket.rooms);
+            socket.rooms.forEach(async (room) => {
+                socket.leave(room);
+                console.log(room);
+                io.to(room).emit('disconnectParticipant', socket.id);
+
+            });
         });
-      });
-  
-      socket.on('disconnect', () => {
-        console.log('Bir bağlantı sonlandırıldı:', socket.id);
-        console.log(socket.rooms);
-      });
-  
+
+        socket.on('disconnect', () => {
+            console.log('Bir bağlantı sonlandırıldı:', socket.id);
+            console.log(socket.rooms);
+        
+        });
     });
-  };
+}
+
 
 const getAllPartipicants = async (req, res) => {
     try {
