@@ -67,7 +67,7 @@ const partipicantSocket = (io) => {
           io.to(room).emit('disconnectParticipant', socket.id);
           try {
             // Veritabanından katılımcıyı bul ve sil
-            const participant = await Partipicant.findOne({ name: participant.name });
+            const participant = await Partipicant.findOne({ name: socket.id });
             if (participant) {
               await participant.remove();
             }
