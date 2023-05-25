@@ -1,7 +1,6 @@
 const Partipicant = require('../models/Participants');
 const httpStatus = require("http-status");
 
-const participants = {};
 const partipicantSocket = (io) => {
     io.on('connection', (socket) => {
         console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
@@ -24,15 +23,19 @@ const partipicantSocket = (io) => {
 
         socket.on("disconnecting", () => {
             console.log(socket.rooms);
-            socket.rooms.forEach((room) => {
+            socket.rooms.forEach(async (room) => {
                 socket.leave(room);
                 console.log(room);
                 io.to(room).emit('disconnectParticipant', socket.id);
-                const participant = participants[socket.id];
-                if (participant) {
-                    delete participants[socket.id];
-                    delete participants[participant.name];
-                }
+                try {
+                    // Veritabanından katılımcıyı bul ve sil
+                    const participant = await Partipicant.findOne({ name: socket.id });
+                    if (participant) {
+                      await participant.remove();
+                    }
+                  } catch (error) {
+                    console.error('Katılımcı silinirken bir hata oluştu:', error);
+                  }
 
             });
         });
@@ -40,11 +43,7 @@ const partipicantSocket = (io) => {
         socket.on('disconnect', () => {
             console.log('Bir bağlantı sonlandırıldı:', socket.id);
             console.log(socket.rooms);
-            const participant = participants[socket.id];
-            if (participant) {
-                delete participants[socket.id];
-                delete participants[participant.name];
-            }
+        
         });
     });
 }
