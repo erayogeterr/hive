@@ -41,29 +41,24 @@ const httpStatus = require("http-status");
 // }
 
 const partipicantSocket = (io) => {
-    let isParticipantAdded = false; // Katılımcının eklenip eklenmediğini belirten bayrak
+    io.once('connection', (socket) => { // 'once' kullanarak dinleyiciyi bir kez tanımlayın
   
-    io.on('connection', (socket) => {
       console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
   
-      if (!isParticipantAdded) { // Katılımcı henüz eklenmediyse
-        socket.on('partipicant', async (data) => {
-          try {
-            const partipicant = new Partipicant({
-              name: data.name,
-              room: data.roomId,
-            });
-            await partipicant.save();
-            participants[socket.id] = partipicant;
-            socket.join(data.roomId);
-            io.to(data.roomId).emit('newPartipicant', { name: partipicant.name, _id: socket.id });
-  
-            isParticipantAdded = true; // Katılımcıyı ekledikten sonra bayrağı true olarak ayarla
-          } catch (error) {
-            console.error('Katılımcı kaydedilirken bir hata oluştu:', error);
-          }
-        });
-      }
+      socket.on('partipicant', async (data) => {
+        try {
+          const partipicant = new Partipicant({
+            name: data.name,
+            room: data.roomId,
+          });
+          await partipicant.save();
+          participants[socket.id] = partipicant;
+          socket.join(data.roomId);
+          io.to(data.roomId).emit('newPartipicant', { name: partipicant.name, _id: socket.id });
+        } catch (error) {
+          console.error('Katılımcı kaydedilirken bir hata oluştu:', error);
+        }
+      });
   
       socket.on("disconnecting", async () => {
         console.log(socket.rooms);
@@ -87,6 +82,12 @@ const partipicantSocket = (io) => {
         console.log('Bir bağlantı sonlandırıldı:', socket.id);
         console.log(socket.rooms);
       });
+  
+      socket.once('disconnect', () => { // 'once' kullanarak dinleyiciyi bir kez çağırın
+        console.log('Bir bağlantı sonlandırıldı:', socket.id);
+        console.log(socket.rooms);
+      });
+  
     });
   };
 
