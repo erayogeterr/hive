@@ -1,6 +1,7 @@
 const Partipicant = require('../models/Participants');
 const httpStatus = require("http-status");
 
+const participants = {};
 const partipicantSocket = (io) => {
     io.on('connection', (socket) => {
         console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
@@ -12,12 +13,10 @@ const partipicantSocket = (io) => {
                     room: data.roomId,
                 });
                 await partipicant.save();
-                console.log("partipicant kaydedildi.")
+                participants[socket.id] = partipicant;
                 socket.join(data.roomId);
-                console.log("odaya dahil olundu.")
-                // io.to(data.roomId).emit('newPartipicant', {name : socket.id});
-                io.to(data.roomId).emit('newPartipicant', { name: partipicant.name });
-                console.log("io to calisti.")
+                // io.to(data.roomId).emit('newPartipicant', {name : socket.id,});
+                io.to(data.roomId).emit('newPartipicant', { name: partipicant.name, _id : socket.id });
             } catch (error) {
                 console.error('Katılımcı kaydedilirken bir hata oluştu:', error);
             }
@@ -29,6 +28,8 @@ const partipicantSocket = (io) => {
                 socket.leave(room);
                 console.log(room);
                 io.to(room).emit('disconnectParticipant', socket.id);
+                delete participants[socket.id];
+
             });
         });
 
@@ -39,26 +40,26 @@ const partipicantSocket = (io) => {
     });
 }
 
-const getAllPartipicants = async (req,res) => {
+const getAllPartipicants = async (req, res) => {
     try {
-      const partipicants = await Partipicant.find();
-      res.status(httpStatus.OK).send(partipicants);
+        const partipicants = await Partipicant.find();
+        res.status(httpStatus.OK).send(partipicants);
     } catch (error) {
-      console.error('Katılımcılar alınırken bir hata oluştu:', error);
-      throw error;
+        console.error('Katılımcılar alınırken bir hata oluştu:', error);
+        throw error;
     }
-  };
-  
-  const getAllPartipicantsInRoom = async (req, res) => {
+};
+
+const getAllPartipicantsInRoom = async (req, res) => {
     try {
-      const roomId = req.params.roomId;
-      const partipicants = await Partipicant.find({ room: roomId });
-      res.status(httpStatus.OK).send(partipicants);
+        const roomId = req.params.roomId;
+        const partipicants = await Partipicant.find({ room: roomId });
+        res.status(httpStatus.OK).send(partipicants);
     } catch (error) {
-      console.error('Odaya özgü katılımcılar alınırken bir hata oluştu:', error);
-      throw error;
+        console.error('Odaya özgü katılımcılar alınırken bir hata oluştu:', error);
+        throw error;
     }
-  };
+};
 
 module.exports = {
     partipicantSocket,
