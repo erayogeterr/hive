@@ -24,6 +24,7 @@ const questionSocket = (io) => {
         io.to(data.roomId).emit('newQuestion', {
           name: "anonymous-" + socket.id.slice(1, 5),
           _id: socket.id,
+          text: data.text,
           // likeCount: 0
         });
       } catch (error) {
