@@ -31,7 +31,7 @@ const questionSocket = (io) => {
       }
     });
 
-    socket.on('likeQuesiton')
+  
     //   socket.on('partipicant',async (data) => {
     //     socket.join(data.roomId);
     //     io.to(data.roomId).emit('newPartipicant', {name : socket.id});
