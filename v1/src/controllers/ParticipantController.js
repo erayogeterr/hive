@@ -70,19 +70,14 @@ const partipicantSocket = (io) => {
                 socket.leave(room);
                 console.log(room);
                 console.log("Socketten çıktın.")
-                if (participants[socket.id]) {
-                    delete participants[socket.id];
-                    io.to(room).emit('disconnectParticipant', { _id: socket.id });
-                }
+                io.to(room).emit('disconnectParticipant', { _id: socket.id });
             });
         });
 
         socket.on('disconnect', () => {
             console.log('Bir bağlantı sonlandırıldı:', socket.id);
             console.log(socket.rooms);
-            if (participants[socket.id]) {
-                delete participants[socket.id];
-            }
+        
         });
     });
 };
