@@ -6,8 +6,8 @@ const QuestionSchema = new Mongoose.Schema({
     required: true,
   },
   participant: {
-    type: Mongoose.Schema.Types.ObjectId,
-    ref: "Participant",
+    type: String,
+  //  ref: "Participant",
   },
   room: {
     type: Mongoose.Schema.Types.ObjectId,
