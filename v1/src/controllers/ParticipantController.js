@@ -2,7 +2,7 @@ const Partipicant = require('../models/Participants');
 const httpStatus = require("http-status");
 
 // const partipicantSocket = (io) => {
-    
+
 //     io.on('connection', (socket) => {
 //         console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
 
@@ -34,7 +34,7 @@ const httpStatus = require("http-status");
 //         socket.on('disconnect', () => {
 //             console.log('Bir bağlantı sonlandırıldı:', socket.id);
 //             console.log(socket.rooms);
-        
+
 //         });
 //     });
 // }
@@ -46,31 +46,19 @@ const partipicantSocket = (io) => {
     io.on('connection', (socket) => {
         console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
 
-        // Eğer aynı socketId'ye sahip bir katılımcı zaten varsa, bağlantıyı kapat
-        console.log("Görünüşe göre ilk defa katılıyorsun. Sana yeni bir katılımcı nick veriyorum.")
-        if (participants[socket.id]) {
-            console.log("Socket.id numaran aynı olduğundan yeniden katılamazsın.")
-            console.log("Socket'ini kapatıyorum.")
-            socket.disconnect();
-            return;
-        }
 
         socket.on('partipicant', async (data) => {
             try {
-                // Eğer aynı socketId'ye sahip bir katılımcı zaten varsa, işlemi sonlandır
-                if (participants[socket.id]) {
-                    return;
-                }
-
                 const partipicant = new Partipicant({
-                    name: data.name,
+                    name: "anonymous-" + socket.id.slice(1, 5),
                     room: data.roomId,
                 });
+
                 await partipicant.save();
                 socket.join(data.roomId);
                 participants[socket.id] = partipicant;
-                io.to(data.roomId).emit('newPartipicant', { name: partipicant.name, _id : socket.id });
-                console.log({ name: partipicant.name, _id : socket.id });
+                io.to(data.roomId).emit('newPartipicant', { name: partipicant.name, _id: socket.id });
+                console.log({ name: partipicant.name, _id: socket.id });
             } catch (error) {
                 console.error('Katılımcı kaydedilirken bir hata oluştu:', error);
             }
@@ -81,9 +69,10 @@ const partipicantSocket = (io) => {
             socket.rooms.forEach(async (room) => {
                 socket.leave(room);
                 console.log(room);
+                console.log("Socketten çıktın.")
                 if (participants[socket.id]) {
                     delete participants[socket.id];
-                    io.to(room).emit('disconnectParticipant', socket.id);
+                    io.to(room).emit('disconnectParticipant', { _id: socket.id });
                 }
             });
         });
@@ -113,7 +102,7 @@ const getAllPartipicantsInRoom = async (req, res) => {
     try {
         const roomId = req.params.roomId;
         const partipicants = await Partipicant.find({ room: roomId });
-        res.status(httpStatus.OK).send(partipicants);
+        res.status(httpStatus.OK).send({ participantLenght: partipicants.length });
     } catch (error) {
         console.error('Odaya özgü katılımcılar alınırken bir hata oluştu:', error);
         throw error;
