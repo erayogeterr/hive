@@ -41,7 +41,7 @@ const httpStatus = require("http-status");
 
 const partipicantSocket = (io) => {
 
-    const participants = {}; // Katılımcıları saklamak için bir nesne
+    const participants = {}; 
 
     io.on('connection', (socket) => {
         console.log('Yeni bir bağlantı oluşturuldu:', socket.id);

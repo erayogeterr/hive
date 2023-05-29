@@ -5,52 +5,61 @@ const questionSocket = (io) => {
   io.on('connection', (socket) => {
     console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
 
-    // Yeni bir soru gönderildiğinde
     socket.on('question', async (data) => {
       try {
-        // Question modelinden yeni bir soru oluştur
         const question = new Question({
           text: data.text,
           participant: "anonymous-" + socket.id.slice(1, 5),
           room: data.roomId,
-          // likeCount:0
+          
         });
-
-        // Soruyu kaydet
         await question.save();
 
-        // Yeni soruyu tüm bağlantılara yayınla
-        // io.emit('newQuestion', question);
         io.to(data.roomId).emit('newQuestion', {
           name: "anonymous-" + socket.id.slice(1, 5),
           _id: socket.id,
           text: data.text,
-          // likeCount: 0
+          questionId: question._id,
         });
       } catch (error) {
         console.error('Soru kaydedilirken bir hata oluştu:', error);
       }
     });
 
-  
-    //   socket.on('partipicant',async (data) => {
-    //     socket.join(data.roomId);
-    //     io.to(data.roomId).emit('newPartipicant', {name : socket.id});
-    //   })
+    socket.on('toggleLikeQuestion', async (data) => {
+      try {
+        const questionId = data.questionId;
+        const participantName = data.participantName;
 
-    //   socket.on("disconnecting", () => {
-    //     console.log(socket.rooms);
-    //     socket.rooms.forEach((room) => {
-    //       socket.leave(room);
-    //       console.log(room);
-    //       io.to(room).emit('disconnectParticipant', socket.id);
-    //     });
-    //   });
+        const question = await Question.findById(questionId);
+        if (!question) {
+          return;
+        }
 
-    //   socket.on('disconnect', () => {
-    //     console.log('Bir bağlantı sonlandırıldı:', socket.id);
-    //     console.log(socket.rooms);
-    // });
+        const alreadyLiked = question.likedBy.includes(participantName);
+        console.log("Aynı soruyu beğenmiş mi? : " + alreadyLiked);
+
+        if (alreadyLiked) {
+          question.likeCount -= 1;
+          question.likedBy = question.likedBy.filter(name => name !== participantName.toString());
+        } else {
+          if (!question.likedBy.includes(participantName)) {
+            question.likeCount += 1;
+            question.likedBy.push(participantName);
+          }
+        }
+
+        await question.save();
+      
+        io.to(data.roomId).emit('questionLiked', {
+           questionId : questionId,
+           likeCount: question.likeCount
+          });
+          console.log({questionId : questionId , likeCount : question.likeCount});
+      } catch (error) {
+        console.log('Soru beğenilirken bir hata oluştu:', error);
+      }
+    });
   });
 };
 
@@ -74,6 +83,7 @@ const getAllQuestionsInRoom = async (req, res) => {
     throw error;
   }
 };
+
 
 module.exports = {
   questionSocket,
