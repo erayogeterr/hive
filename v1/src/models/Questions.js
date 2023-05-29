@@ -7,11 +7,19 @@ const QuestionSchema = new Mongoose.Schema({
   },
   participant: {
     type: String,
-  //  ref: "Participant",
+    //  ref: "Participant",
   },
   room: {
     type: Mongoose.Schema.Types.ObjectId,
     ref: "Room",
+  },
+  likeCount: {
+    type: Number,
+    default: 0,
+  },
+  likedBy: {
+    type: [String],
+    default: [],
   },
 }, { timestamps: true, versionKey: false });
 
