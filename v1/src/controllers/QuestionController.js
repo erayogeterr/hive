@@ -11,15 +11,18 @@ const questionSocket = (io) => {
           text: data.text,
           participant: "anonymous-" + socket.id.slice(1, 5),
           room: data.roomId,
-          
+
         });
         await question.save();
+
+        const sortedQuestions = await Question.find({ room: data.roomId }).sort({ likeCount: -1 });
 
         io.to(data.roomId).emit('newQuestion', {
           name: "anonymous-" + socket.id.slice(1, 5),
           _id: socket.id,
           text: data.text,
           questionId: question._id,
+          sortedQuestions: sortedQuestions,
         });
       } catch (error) {
         console.error('Soru kaydedilirken bir hata oluştu:', error);
@@ -50,12 +53,19 @@ const questionSocket = (io) => {
         }
 
         await question.save();
-      
-        io.to(data.roomId).emit('questionLiked', {
-           questionId : questionId,
-           likeCount: question.likeCount
-          });
-          console.log({questionId : questionId , likeCount : question.likeCount});
+
+        const response = {
+          questionId: questionId,
+          likeCount: question.likeCount
+        };
+
+        socket.emit('questionLiked', response);
+        io.to(data.roomId).emit('questionLiked', response);
+
+        // io.to(data.roomId).emit('questionLiked', {
+        //    questionId : questionId,
+        //    likeCount: question.likeCount
+        //   });
       } catch (error) {
         console.log('Soru beğenilirken bir hata oluştu:', error);
       }
@@ -76,7 +86,8 @@ const getAllQuestions = async (req, res) => {
 const getAllQuestionsInRoom = async (req, res) => {
   try {
     const roomId = req.params.roomId;
-    const questions = await Question.find({ room: roomId });
+    // const questions = await Question.find({ room: roomId });
+    const questions = await Question.find({ room: roomId }).sort({ likeCount: -1 }); // En yüksek beğeni alan en üstte.
     res.status(httpStatus.OK).send(questions);
   } catch (error) {
     console.error('Odaya özgü sorular alınırken bir hata oluştu:', error);
