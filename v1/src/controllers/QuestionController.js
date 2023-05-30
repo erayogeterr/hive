@@ -15,14 +15,11 @@ const questionSocket = (io) => {
         });
         await question.save();
 
-        const sortedQuestions = await Question.find({ room: data.roomId }).sort({ likeCount: -1 });
-
         io.to(data.roomId).emit('newQuestion', {
           name: "anonymous-" + socket.id.slice(1, 5),
           _id: socket.id,
           text: data.text,
           questionId: question._id,
-          sortedQuestions: sortedQuestions,
         });
       } catch (error) {
         console.error('Soru kaydedilirken bir hata oluştu:', error);
@@ -40,6 +37,7 @@ const questionSocket = (io) => {
         }
 
         const alreadyLiked = question.likedBy.includes(participantName);
+        
         console.log("Aynı soruyu beğenmiş mi? : " + alreadyLiked);
 
         if (alreadyLiked) {
@@ -51,12 +49,13 @@ const questionSocket = (io) => {
             question.likedBy.push(participantName);
           }
         }
-
         await question.save();
+        const sortedQuestions = await Question.find({ room: data.roomId }).sort({ likeCount: -1 });
 
         const response = {
           questionId: questionId,
-          likeCount: question.likeCount
+          likeCount: question.likeCount,
+          sortedQuestions: sortedQuestions,
         };
 
         socket.emit('questionLiked', response);
@@ -86,7 +85,6 @@ const getAllQuestions = async (req, res) => {
 const getAllQuestionsInRoom = async (req, res) => {
   try {
     const roomId = req.params.roomId;
-    // const questions = await Question.find({ room: roomId });
     const questions = await Question.find({ room: roomId }).sort({ likeCount: -1 }); // En yüksek beğeni alan en üstte.
     res.status(httpStatus.OK).send(questions);
   } catch (error) {

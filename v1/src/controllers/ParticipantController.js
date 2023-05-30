@@ -12,10 +12,6 @@ const partipicantSocket = (io) => {
 
         socket.on('partipicant', async (data) => {
             try {
-                const room = await Room.findOne({ code: data.roomCode });
-                if (!room) {
-                    return res.status(httpStatus.OK).send({ message: 'Katılım başarılı.' });
-                }
 
                 const partipicant = new Partipicant({
                     name: "anonymous-" + socket.id.slice(1, 5),
