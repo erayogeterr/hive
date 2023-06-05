@@ -138,28 +138,6 @@ const deleteRoom = (req, res) => {
         });
 };
 
-
-// const JoinRoom = async (req, res) => {
-
-//     const code = req.params.code;
-
-//     const room = await Rooms.findOne({ code });
-
-//     if (!room) {
-//         return res.status(httpStatus.NOT_FOUND).send({ message: 'Geçersiz kod' });
-//     }
-
-//     const participant = new Participant({ room: room.id});
-//     await participant.save();
-
-//      let participants = room.participants || [];
-//      participants.push(participant.name);
-//      room.participants = participants;
-
-//     await room.save();
-//     return res.status(httpStatus.OK).send({ message: 'Katılım başarılı.', participant });
-// };
-
 const JoinRoom = (io) => 
     io.on('connection', (socket) => {
         console.log('Yeni bir kullanıcı bağlandı.');

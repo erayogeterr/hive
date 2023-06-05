@@ -27,19 +27,6 @@ const create = async (req, res) => {
     }
 };
 
-// const index = async (req, res) => {
-//     try {
-//         const users = await Users.find().populate({
-//             path: 'rooms',
-//             select: 'eventName eventDescription lessonName code'
-//         }).exec();
-
-//         return res.status(httpStatus.OK).send(users);
-//     } catch (err) {
-//         return res.status(httpStatus.INTERNAL_SERVER_ERROR).send({error : "Odalar getirilemedi."});
-//     }
-// };
-
 const index = async (req, res) => {
     try {
         const users = await Users.find().populate('rooms', 'eventName eventDescription lessonName code');
@@ -76,44 +63,6 @@ const login = (req, res) => {
         })
         .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
 };
-
-// const login = async (req, res) => {
-//     try {
-//         const hashedPassword = passwordToHash(req.body.password);
-//         const user = await loginUser({ ...req.body, password: hashedPassword }); // req.body'deki tüm özellikleri ... operatörü ile geçmiş oluyoruz.Email pass gibi.
-
-//         if (!user) {
-//             return res.status(httpStatus.NOT_FOUND).send({ message: "Girilen kullanıcı adı ya da şifre hatalı. Lütfen girdiğiniz bilgileri kontrol ederek tekrar deneyiniz." });
-//         }
-
-//         const accessToken = generateAccessToken(user);
-//         const refreshToken = generateRefreshToken(user);
-//         const userWithTokens = { ...user.toObject(), tokens: { access_token: accessToken, refresh_token: refreshToken } }; //Mongoose modelinin JSON nesnesini alarak, userWithTokens adlı bir obje oluşturuyoruz.
-
-//         res.status(httpStatus.OK).send(userWithTokens);
-//     } catch (err) {
-//         res.status(httpStatus.INTERNAL_SERVER_ERROR).send(err);
-//     }
-// };
-
-// const resetPassword = (req, res) => {
-//     const new_password = uuid.v4()?.split("-")[0] || `usr-${new Date().getTime()}`;
-//     modifyWhere({ email: req.body.email }, { password: passwordToHash(new_password) })
-//         .then((updatedUser) => {
-//             if (!updatedUser) {
-//                 return res.status(httpStatus.NOT_FOUND).send({ error: "Böyle bir kullanıcı bulunmamaktadır." });
-//             }
-//             eventEmitter.emit("send_email", {
-//                 to: updatedUser.email,
-//                 subject: "Şifre Sıfırlama",
-//                 html: `Talebiniz üzerine şifre sıfırlama işleminiz gerçekleşmiştir. <br /> Giriş yaptıktan sonra şifrenizi değiştirmeyi unutmayın! <br /> Yeni Şifreniz : <b>${new_password}`
-//             });
-//             res.status(httpStatus.OK).send({
-//                 message: "Şifre sıfırlama işlemi için sisteme kayıtlı e-posta adresinize gereken bilgileri gönderdik."
-//             })
-//         })
-//         .catch(() => res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ error: "Şifre resetleme sırasında bir problem oluştu." }));
-// };
 
 const resetPassword = async (req, res) => {
     try {

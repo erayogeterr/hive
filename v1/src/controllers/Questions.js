@@ -11,16 +11,19 @@ const questionSocket = (io) => {
           text: data.text,
           participant: "anonymous-" + socket.id.slice(1, 5),
           room: data.roomId,
-
         });
         await question.save();
 
-        io.to(data.roomId).emit('newQuestion', {
+        const response = {
           name: "anonymous-" + socket.id.slice(1, 5),
           _id: socket.id,
           text: data.text,
           questionId: question._id,
-        });
+        };
+
+        socket.emit('newQuestion', response);
+        io.to(data.roomId).emit('newQuestion', response);
+
       } catch (error) {
         console.error('Soru kaydedilirken bir hata oluştu:', error);
       }
@@ -61,10 +64,6 @@ const questionSocket = (io) => {
         socket.emit('questionLiked', response);
         io.to(data.roomId).emit('questionLiked', response);
 
-        // io.to(data.roomId).emit('questionLiked', {
-        //    questionId : questionId,
-        //    likeCount: question.likeCount
-        //   });
       } catch (error) {
         console.log('Soru beğenilirken bir hata oluştu:', error);
       }

@@ -7,7 +7,6 @@ const QuestionSchema = new Mongoose.Schema({
   },
   participant: {
     type: String,
-    //  ref: "Participant",
   },
   room: {
     type: Mongoose.Schema.Types.ObjectId,

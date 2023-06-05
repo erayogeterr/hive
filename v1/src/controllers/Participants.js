@@ -4,29 +4,44 @@ const Room = require("../models/Rooms");
 
 const partipicantSocket = (io) => {
 
-    const participants = {}; 
+    const participants = {};
 
     io.on('connection', (socket) => {
         console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
 
-
         socket.on('partipicant', async (data) => {
             try {
+                let room;
+                if (data.roomCode) {
+                     room = await Room.findOne({ code: data.roomCode });
+
+                if (!room) {
+                    const errorMessage = 'Oda kodu yanlış!';
+                    socket.emit('newParticipant', errorMessage);
+                    return;
+                  }
+                }
 
                 const partipicant = new Partipicant({
                     name: "anonymous-" + socket.id.slice(1, 5),
-                    room: data.roomId,
+                    room: data?.roomId||room.id,
                 });
 
                 await partipicant.save();
 
-                socket.join(data.roomId);
+                    if (data.roomId) {
+                        socket.join(data.roomId);
+                    } else {
+                        socket.join(room.id);
+                    }
 
-                participants[socket.id] = partipicant;
+                const response = {
+                    name: partipicant.name,
+                    _id: socket.id,
+                  };
+                  
+                  io.to(data?.roomId||room.id).emit('newParticipant', response);
 
-                io.to(data.roomId).emit('newPartipicant', { name: partipicant.name, _id: socket.id });
-
-                console.log({ name: partipicant.name, _id: socket.id });
             } catch (error) {
                 console.error('Katılımcı kaydedilirken bir hata oluştu:', error);
             }
@@ -45,7 +60,7 @@ const partipicantSocket = (io) => {
         socket.on('disconnect', () => {
             console.log('Bir bağlantı sonlandırıldı:', socket.id);
             console.log(socket.rooms);
-        
+
         });
     });
 };
