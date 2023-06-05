@@ -21,8 +21,8 @@ const io = socketIO(server, {
 
 config();
 loaders();
-const { questionSocket } = require('./controllers/QuestionController');
-const { partipicantSocket } = require('./controllers/ParticipantController');
+const { questionSocket } = require('./controllers/Questions');
+const { partipicantSocket } = require('./controllers/Participants');
 questionSocket(io);
 partipicantSocket(io);
 

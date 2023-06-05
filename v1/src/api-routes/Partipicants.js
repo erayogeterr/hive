@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { getAllPartipicants , getAllPartipicantsInRoom } = require("../controllers/ParticipantController");
+const { getAllPartipicants , getAllPartipicantsInRoom } = require("../controllers/Participants");
 
 const router = express.Router();
 

@@ -1,6 +1,6 @@
 const express = require("express");
 
-const { getAllQuestions, getAllQuestionsInRoom } = require("../controllers/QuestionController");
+const { getAllQuestions, getAllQuestionsInRoom } = require("../controllers/Questions");
 
 const router = express.Router();
 
