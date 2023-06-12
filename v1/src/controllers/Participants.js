@@ -4,8 +4,6 @@ const Room = require("../models/Rooms");
 
 const partipicantSocket = (io) => {
 
-    const participants = {};
-
     io.on('connection', (socket) => {
         console.log('Yeni bir bağlantı oluşturuldu:', socket.id);
 
@@ -38,6 +36,7 @@ const partipicantSocket = (io) => {
                 const response = {
                     name: partipicant.name,
                     _id: socket.id,
+                    roomId : room.id,
                   };
                   
                   io.to(data?.roomId||room.id).emit('newParticipant', response);
